@@ -11,6 +11,20 @@ Prints styled text to the console directly.
 *   **styles** *(str or list)*: A single string or a list of styles (e.g., `'hold'` or `['bold', 'underline']`).
 *   **end** *(str)*: String appended after the last value, default is a newline.
 
+### `cinput(prompt_text, color="cyan", styles="bold")`
+**[New in v0.0.2]**
+Displays a styled prompt and waits for user input.
+
+- **Parameters:**
+  - `prompt_text` (Any): The text to display as the prompt.
+  - `color` (str): Color of the prompt text. Default is `"cyan"`.
+  - `styles` (str | list): Styles for the prompt. Default is `"bold"`.
+- **Returns:**
+  - `str`: The user's input.
+  - `None`: If the user presses `Ctrl+C` (KeyboardInput).
+- **Behaior:**
+  - The color resets automatically before the user begins typing, ensuring their input is standard terminal color.
+
 ---
 
 ## 2. Core Classes
@@ -40,6 +54,22 @@ Renders the final string with ANSI escape embedded.
 ### `panel(text, color="white", title=None)`
 Prints a multi-line string enclosed in an ASCII box.
 
-*   **text** *(str)*: The content to display inside the box. Handles `\n` automatically.
-*   **color** *(str)*: The color of the border/box lines.
-*   **title** *(str)*: Optional text to display embedded in the top border.
+- **Parameters**
+  - `text` (str): The content to display inside the box. Handles `\n` automatically.
+  - `color` (str): The color of the border/box lines.
+  - `title` (str): Optional text to display embedded in the top border.
+
+### `progress_bar(iternation, total, length=30, color="green", fill="█", empty="-")`
+**[New in v0.0.2]**
+Prints a dynamic progress bar.
+
+- **Parameters:**
+  - `iteration` (int): Current step (e.g., 5).
+  - `total` (int): Total steps (e.g., 100).
+  - `length` (int): Visual length of the bar in characters.
+  - `color` (str): Color of the filled portion.
+  - `fill` (str): Character used for the completed section.
+  - `empty` (str): Character used for the remaining section.
+- **Behavior:**
+  - Hides the cursor while updating to prevent flickering.
+  - Automatically handles `ZeroDivisionError` if `total` is 0.

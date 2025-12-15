@@ -4,10 +4,9 @@
 
 ## 📦 Features
 
-- **Simple Color Printing**: Easy wrappers for colored output.
-- **Object-Oriented Styling**: Chainable `Text` objects for complex formatting.
-- **Widgets**: Built-in formatting for UI elements like Panels.
-- **Zero Dependencies**: Pure Python, uses standard ANSI escape codes.
+- **Progress Bars**: Smooth, flicker-free progress tracking.
+- **Styled Input**: Colorized user prompts (`cinput`).
+- **Stability**: Improved type safety and edge-case handling.
 
 ## 🛠 Installation
 
