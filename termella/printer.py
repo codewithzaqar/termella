@@ -20,5 +20,8 @@ def cinput(prompt_text, color="cyan", styles="bold"):
     Prints a styled prompt and returns the user input.
     """
     styled_prompt = Text(prompt_text).style(color=color, styles=styles)
-    # Reset formatting before the user types
-    return input(f"{styled_prompt} \033[0m")
+    try:
+        return input(f"{styled_prompt} \033[0m")
+    except KeyboardInterrupt:
+        print()
+        return None
