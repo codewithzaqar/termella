@@ -12,3 +12,13 @@ def cprint(text, color=None, bg=None, styles=None, end="\n"):
     """
     styled_text = Text(text).style(color, bg, styles)
     print(styled_text, end=end)
+
+def cinput(prompt_text, color="cyan", styles="bold"):
+    """
+    [New in v0.0.2a] Styled Input.
+
+    Prints a styled prompt and returns the user input.
+    """
+    styled_prompt = Text(prompt_text).style(color=color, styles=styles)
+    # Reset formatting before the user types
+    return input(f"{styled_prompt} \033[0m")

@@ -1,25 +1,35 @@
+import sys
 from .core import Text
 
 def panel(text, color="white", title=None):
     """
-    Greates a simple ASCII box around text.
+    Creates a simple ASCII box around text.
     """
     lines = text.split("\n")
     width = max(len(line) for line in lines) + 2
+    tl, tr, bl, br, h, v= "┌", "┐", "└", "┘", "─", "│"
 
-    # Box characters
-    tl, tr, bl, br = "┌", "┐", "└", "┘"
-    h, v = "─", "│"
+    t_str = f" {title} " if title else ""
+    top = h * (width - len(t_str))
 
-    # Build Top
-    rendered_title = f" {title} " if title else ""
-    top_bar = h * (width - len(rendered_title))
-    print(Text(f"{tl}{rendered_title}{top_bar}{tr}").style(color))
-
-    # Build Content
+    print(Text(f"{tl}{t_str}{top}{tr}").style(color))
     for line in lines:
-        padded = line.ljust(width)
-        print(Text(f"{v}{padded}{v}").style(color))
-
-    # Build Bottom
+        print(Text(f"{v}{line.ljust(width)}{v}").style(color))
     print(Text(f"{bl}{h * width}{br}").style(color))
+
+def progress_bar(iteration, total, length=30, color="green", fill="█", empty="-"):
+    """
+    [New in v0.0.2a] Prints a progress bar to the console.
+    """
+    percent = ("{0:.1f}").format(100 * (iteration / float(total)))
+    filled_length = int(length * iteration // total)
+
+    filled = str(Text(fill * filled_length).style(color))
+    unfilled = empty * (length - filled_length)
+
+    # Use carriage return \r to stay on the same line
+    sys.stdout.write(f'\r{filled}{unfilled} {percent}%')
+    sys.stdout.flush()
+
+    if iteration == total:
+        print()
