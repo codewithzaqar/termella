@@ -1,7 +1,7 @@
 import sys
 import time
 import threading
-from ..ansi import CURSOR_HIDE, CURSOR_SHOW
+from ..ansi import CURSOR_HIDE, CURSOR_SHOW, COLORS
 
 class Spinner:
     """
@@ -21,7 +21,7 @@ class Spinner:
         idx = 0
         while self.running:
             frame = self.frames[idx % len(self.frames)]
-            sys.stdout.write(f"\r{CURSOR_HIDE}{frame} {self.message}")
+            sys.stdout.write(f"\r{CURSOR_HIDE}\033[{COLORS['cyan']}m{frame}\033[0m {self.message}")
             sys.stdout.flush()
             idx += 1
             time.sleep(self.delay)
@@ -34,6 +34,12 @@ class Spinner:
     
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.running = False
-        self.thread.join()
-        sys.stdout.write(f"\r{CURSOR_SHOW}✔ {self.message} Done.\n")
+        if self.thread:
+            self.thread.join()
+        sys.stdout.write(f"\r{CURSOR_SHOW}")
+        if exc_type:
+            sys.stdout.write(f"\033[{COLORS['red']}m✖ {self.message} Failed!\033[0m\n")
+        else:
+            sys.stdout.write(f"\033[{COLORS['green']}m✔ {self.message} Done.\033[0m\n")
         sys.stdout.flush()
+        return False

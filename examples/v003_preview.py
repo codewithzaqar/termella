@@ -7,27 +7,32 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from termella import cprint, table, Spinner
 
 def main():
-    cprint("--- Termella v0.0.3a Preview ---", styles="bold")
+    cprint("--- Termella v0.0.3b Preview ---", styles="bold")
     print()
 
     # 1. Test Spinner
-    cprint("[1] Testing Async Spinner:", color="cyan")
-    with Spinner("Connecting to database..."):
-        time.sleep(2.5)  # Simulate work
-
+    cprint("[1] Testing Empty Table Handling:", color="cyan")
+    table([], headers=["ID", "Name", "Status"], border_color="yellow")
     print()
 
     # 2. Test Table
-    cprint("[2] Testing Table Renderer:", color="cyan")
+    cprint("[2] Testing Spinner Success:", color="cyan")
+    with Spinner("Loading assets..."):
+        time.sleep(1)
+    print()
 
-    headers = ["ID", "Name", "Role"]
-    data = [
-        ["001", "Alice", "Admin"],
-        ["002", "Bob", "Developer"],
-        ["003", "Charlie", "Designer"]
-    ]
+    # 3. Test Spinner Failure (Exception Handling)
+    cprint("[3] Testing Spinner with Exception (Crash Test):", color="cyan")
+    try:
+        with Spinner("Connecting to server..."):
+            time.sleep(1)
+            raise ValueError("Simulated Connection Error")
+    except ValueError as e:
+        cprint(f"Caught expected error: {e}", color="dim")
 
-    table(data, headers=headers, border_color="blue")
+    print()
+    cprint("Check cursor visibility: [  ok  ]", color="green")
+    input("Press Enter to exit (cursor should be blinking...)")
 
 if __name__ == "__main__":
     main()
