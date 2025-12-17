@@ -9,6 +9,11 @@ RESET = "\033[0m"
 CURSOR_HIDE = "\033[?25l"
 CURSOR_SHOW = "\033[?25h"
 
+# Navigation (New in v0.0.4a)
+CURSOR_UP = "\033[A"
+CURSOR_DOWN = "\033[B"
+CLEAN_LINE = "\033[2K"
+
 COLORS = {
     "black": "30", "red": "31", "green": "32", "yellow": "33",
     "blue": "34", "magenta": "35", "cyan": "36", "white": "37",
