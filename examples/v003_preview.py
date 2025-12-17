@@ -7,32 +7,33 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from termella import cprint, table, Spinner
 
 def main():
-    cprint("--- Termella v0.0.3b Preview ---", styles="bold")
+    cprint("--- Termella v0.0.3c RC Test ---", styles="bold")
     print()
 
-    # 1. Test Spinner
-    cprint("[1] Testing Empty Table Handling:", color="cyan")
-    table([], headers=["ID", "Name", "Status"], border_color="yellow")
+    # Data: Product List
+    headers = ["ID", "Product", "Price", "Stock"]
+    data = [
+        [1, "Widget A", "$10.50", 100],
+        [2, "Widget B", "$5.99", 5000],
+        [3, "Premium Kit", "$1,250.00", 2],
+        [4, "Cheap Part", "$0.99", 150]
+    ]
+
+    # Test 1: Default Alignment (Left)
+    cprint("[1] Default Alignment (Left):", color="cyan")
+    table(data, headers=headers)
     print()
 
-    # 2. Test Table
-    cprint("[2] Testing Spinner Success:", color="cyan")
-    with Spinner("Loading assets..."):
-        time.sleep(1)
-    print()
+    # Test 2: Custom Alignment
+    # ID: Center, Product: Left, Price: Right, Stock: Right
+    cprint("[2] Financial Alignment (Center, Left, Right, Right):", color="cyan")
+    
+    custom_align = ["center", "left", "right", "right"]
 
-    # 3. Test Spinner Failure (Exception Handling)
-    cprint("[3] Testing Spinner with Exception (Crash Test):", color="cyan")
-    try:
-        with Spinner("Connecting to server..."):
-            time.sleep(1)
-            raise ValueError("Simulated Connection Error")
-    except ValueError as e:
-        cprint(f"Caught expected error: {e}", color="dim")
+    table(data, headers=headers, align=custom_align, border_color="green")
 
     print()
-    cprint("Check cursor visibility: [  ok  ]", color="green")
-    input("Press Enter to exit (cursor should be blinking...)")
+    cprint("v0.0.3c Release Candidate Verified.", color="green")
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
 from ..core import Text
 
-def table(data, headers=None, border_color="white"):
+def table(data, headers=None, border_color="white", align="left"):
     """
     Renders a list of lists as a table.
 
@@ -17,17 +17,26 @@ def table(data, headers=None, border_color="white"):
     else:
         cols = len(headers)
 
-    widths = [0] * cols
+    if isinstance(align, str):
+        aligns = [align.lower()] * cols
+    else:
+        aligns = [a.lower() for a in align] + ["left"] * (cols - len(align))
 
-    all_rows = []
-    if headers:
-        all_rows.append(headers)
-    if data:
-        all_rows.extend(data)
+    widths = [0] * cols
+    all_rows = ([] if not headers else [headers]) + (data if data else [])
 
     for row in all_rows:
         for i in range(min(len(row), cols)):
             widths[i] = max(widths[i], len(str(row[i])))
+
+    def format_cell(content, width, alignment):
+        content = str(content)
+        if alignment == "right":
+            return content.rjust(width)
+        elif alignment == "center":
+            return content.center(width)
+        else: # left
+            return content.ljust(width)
 
     # Formatting helpers
     def print_sep(left, mid, right, line):
@@ -42,21 +51,22 @@ def table(data, headers=None, border_color="white"):
     if headers:
         row_str = "│"
         for i, cell in enumerate(headers):
-            cell_content = str(cell).ljust(widths[i])
-            row_str += f" {cell_content} │"
+            content = format_cell(cell, widths[i], aligns[i])
+            row_str += f" {content} │"
         print(Text(row_str).style(border_color, styles="bold"))
         print_sep("├", "┼", "┤", "─")
 
     # Data
     if not data:
         total_width = sum(widths) + (cols * 3) - 1
-        print(Text("│ " + "No Data Available".center(total_width) + " │").style(border_color, styles="dim"))
+        print(Text("│ " + "No Data".center(total_width) + " │").style(border_color, styles="dim"))
     else:
         for row in data:
             row_str = "│"
             for i in range(cols):
                 cell = row[i] if i < len(row) else ""
-                row_str += f" {str(cell).ljust(widths[i])} │"
+                content = format_cell(cell, widths[i], aligns[i])
+                row_str += f" {content} │"
             print(Text(row_str).style(border_color))
 
     # Bottom Border
