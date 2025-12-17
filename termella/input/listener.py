@@ -16,9 +16,9 @@ class InputListener:
         
     def _read_windows(self):
         import msvcrt
-
         key = msvcrt.getch()
         if key == b'\r': return 'ENTER'
+        if key == b' ': return 'SPACE'
         if key == b'\xe0': # Special keys (arrows)
             key = msvcrt.getch()
             if key == b'H': return 'UP'
@@ -30,7 +30,6 @@ class InputListener:
     def _read_unix(self):
         import tty
         import termios
-        
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
@@ -47,6 +46,7 @@ class InputListener:
                 return 'ESC'
             
             if ch == '\r' or ch == '\n': return 'ENTER'
+            if ch == ' ': return 'SPACE'
             if ch == '\x03': raise KeyboardInterrupt # Handle Ctrl+C
             return ch
         finally:
