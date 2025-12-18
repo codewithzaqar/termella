@@ -19,6 +19,7 @@ class InputListener:
         key = msvcrt.getch()
         if key == b'\r': return 'ENTER'
         if key == b' ': return 'SPACE'
+        if key == b'\x1b': return 'ESC' # Windows usually handles ESC directly
         if key == b'\xe0': # Special keys (arrows)
             key = msvcrt.getch()
             if key == b'H': return 'UP'
@@ -30,6 +31,7 @@ class InputListener:
     def _read_unix(self):
         import tty
         import termios
+        import select
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
@@ -38,6 +40,11 @@ class InputListener:
 
             # Handle Escape Sequences (Arrows)
             if ch == '\x1b':
+                # Check if there is more data ready to read (timeout 0.1s)
+                # If no data, it's just the ESC key.
+                dr, dw, de = select.select([sys.stdin], [], [], 0.1)
+                if not dr:
+                    return 'ESC'
                 seq = sys.stdin.read(2)
                 if seq == '[A': return 'UP'
                 if seq == '[B': return 'DOWN'

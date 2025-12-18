@@ -38,7 +38,8 @@ def select(options, prompt="Select an option:", color="cyan", marker=">"):
             key = listener.read_key()
             if key == 'UP': idx = (idx - 1) % n
             elif key == 'DOWN': idx = (idx + 1) % n
-            elif key == 'ENTER': break
+            elif key == 'ENTER': return options[idx]
+            elif key == 'ESC': return None
 
             # Move Cursor Back Up to redraw
             # We move up 'n' lines
@@ -48,8 +49,7 @@ def select(options, prompt="Select an option:", color="cyan", marker=">"):
         return None
     finally:
         sys.stdout.write(CURSOR_SHOW)
-
-    return options[idx]
+        print()
 
 def checkbox(options, prompt="Select options (Space to toggle):", color="green", marker=">"):
     """
@@ -76,10 +76,8 @@ def checkbox(options, prompt="Select options (Space to toggle):", color="green",
                 # Determine visual state
                 is_focused = (i == idx)
                 is_checked = (i in selected_indices)
-
                 box = "[x]" if is_checked else "[ ]"
                 cursor = marker if is_focused else " "
-
                 # Render
                 line_str = f"{cursor} {box} {opt}"
 
@@ -94,19 +92,16 @@ def checkbox(options, prompt="Select options (Space to toggle):", color="green",
                     print(Text(line_str).style(styles="dim"))
 
             key = listener.read_key()
-
-            if key == 'UP':
-                idx = (idx - 1) % n
-            elif key == 'DOWN':
-                idx = (idx + 1) % n
+            if key == 'UP': idx = (idx - 1) % n
+            elif key == 'DOWN': idx = (idx + 1) % n
             elif key == 'SPACE':
                 # Toggle selection
-                if idx in selected_indices:
-                    selected_indices.remove(idx)
-                else:
-                    selected_indices.add(idx)
+                if idx in selected_indices: selected_indices.remove(idx)
+                else: selected_indices.add(idx)
             elif key == 'ENTER':
-                break
+                return [options[i] for i in sorted(list(selected_indices))]
+            elif key == 'ESC':
+                return []
 
             sys.stdout.write(f"\r{CURSOR_UP * n}")
 
@@ -114,5 +109,4 @@ def checkbox(options, prompt="Select options (Space to toggle):", color="green",
         return []
     finally:
         sys.stdout.write(CURSOR_SHOW)
-
-    return [options[i] for i in sorted(list(selected_indices))]
+        print()
