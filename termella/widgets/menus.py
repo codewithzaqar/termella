@@ -1,110 +1,140 @@
 import sys
 from ..core import Text
 from ..input.listener import InputListener
-from ..ansi import CURSOR_HIDE, CURSOR_SHOW, CURSOR_UP, CLEAN_LINE
+from ..ansi import CURSOR_HIDE, CURSOR_SHOW, CURSOR_UP, CLEAR_LINE
 
-def select(options, prompt="Select an option:", color="cyan", marker=">"):
+def select(options, prompt="Select an option:", color="cyan", marker=">", limit=5):
     """
-    Interactive selection menu using arrow keys.
-
+    Single selection menu with scrolling.
+    
     Args:
-        options (list): List of string options.
-        prompt (str): The question to ask.
-
-    Returns:
-        str: The selected option string.
+        limit (int): Max number of items to show at once.
     """
     listener = InputListener()
     idx = 0
     n = len(options)
-
+    
+    # Scroll Window State
+    scroll_offset = 0
+    # Effective window height
+    window_height = min(n, limit)
+    
     sys.stdout.write(CURSOR_HIDE)
     print(Text(prompt).style(styles="bold"))
 
     try:
         while True:
-            # Render Options
-            for i, opt in enumerate(options):
-                # Clear line to ensure clean redraw
-                sys.stdout.write(CLEAN_LINE)
-                if i == idx:
-                    # Highlight selected
-                    print(Text(f"{marker} {opt}").style(color=color, styles="bold"))
-                else:
-                    # Dim unselected
-                    print(Text(f"  {opt}").style(styles="dim"))
+            # 1. Adjust Scroll Offset
+            # If cursor is above the window, move window up
+            if idx < scroll_offset:
+                scroll_offset = idx
+            # If cursor is below the window, move window down
+            elif idx >= scroll_offset + window_height:
+                scroll_offset = idx - window_height + 1
+
+            # 2. Render Window
+            # Only iterate through the slice of options visible in the window
+            visible_options = options[scroll_offset : scroll_offset + window_height]
+            
+            for i, opt in enumerate(visible_options):
+                # Calculate the true index of this item in the main list
+                real_idx = scroll_offset + i
                 
-            # Wait for Input
+                sys.stdout.write(CLEAR_LINE)
+                
+                # Visual Scroll Indicators (Top/Bottom)
+                prefix = marker if real_idx == idx else " "
+                
+                # Add arrows to indicate more items above/below
+                if i == 0 and scroll_offset > 0:
+                    display_text = f"{prefix} ↑ {opt}" # Arrow Up
+                elif i == window_height - 1 and scroll_offset + window_height < n:
+                    display_text = f"{prefix} ↓ {opt}" # Arrow Down
+                else:
+                    display_text = f"{prefix}   {opt}"
+
+                # Print Styles
+                if real_idx == idx:
+                    print(Text(display_text).style(color=color, styles="bold"))
+                else:
+                    print(Text(display_text).style(styles="dim"))
+
+            # 3. Handle Input
             key = listener.read_key()
             if key == 'UP': idx = (idx - 1) % n
             elif key == 'DOWN': idx = (idx + 1) % n
             elif key == 'ENTER': return options[idx]
             elif key == 'ESC': return None
-
-            # Move Cursor Back Up to redraw
-            # We move up 'n' lines
-            sys.stdout.write(f"\r{CURSOR_UP * n}")
-
+            
+            # 4. Reset Cursor
+            sys.stdout.write(f"\r{CURSOR_UP * window_height}")
+            
     except KeyboardInterrupt:
         return None
     finally:
         sys.stdout.write(CURSOR_SHOW)
         print()
 
-def checkbox(options, prompt="Select options (Space to toggle):", color="green", marker=">"):
+def checkbox(options, prompt="Select options (Space/Enter):", color="green", marker=">", limit=5):
     """
-    [New in v0.0.4b] Multi-selection menu.
-
-    Args:
-        options (list): Options to choose from.
-    Returns:
-        list: A list of the selected option strings.
+    Multi-selection menu with scrolling.
     """
     listener = InputListener()
     idx = 0
     n = len(options)
     selected_indices = set()
-
+    
+    # Scroll Window State
+    scroll_offset = 0
+    window_height = min(n, limit)
+    
     sys.stdout.write(CURSOR_HIDE)
     print(Text(prompt).style(styles="bold"))
 
     try:
         while True:
-            for i, opt in enumerate(options):
-                sys.stdout.write(CLEAN_LINE)
+            # Adjust Scroll
+            if idx < scroll_offset: scroll_offset = idx
+            elif idx >= scroll_offset + window_height: scroll_offset = idx - window_height + 1
 
-                # Determine visual state
-                is_focused = (i == idx)
-                is_checked = (i in selected_indices)
+            visible_options = options[scroll_offset : scroll_offset + window_height]
+            
+            for i, opt in enumerate(visible_options):
+                real_idx = scroll_offset + i
+                sys.stdout.write(CLEAR_LINE)
+                
+                is_focused = (real_idx == idx)
+                is_checked = (real_idx in selected_indices)
+                
                 box = "[x]" if is_checked else "[ ]"
                 cursor = marker if is_focused else " "
-                # Render
-                line_str = f"{cursor} {box} {opt}"
-
+                
+                # Scroll arrows
+                arrow = " "
+                if i == 0 and scroll_offset > 0: arrow = "↑"
+                elif i == window_height - 1 and scroll_offset + window_height < n: arrow = "↓"
+                
+                line_str = f"{cursor} {arrow} {box} {opt}"
+                
                 if is_focused:
-                    # Highlight the active line (cyan for focus)
                     print(Text(line_str).style(color="cyan", styles="bold"))
                 elif is_checked:
-                    # Highlight checked items that aren't focused (green)
                     print(Text(line_str).style(color=color))
                 else:
-                    # Dim unchecked, unfocused items
                     print(Text(line_str).style(styles="dim"))
 
             key = listener.read_key()
             if key == 'UP': idx = (idx - 1) % n
             elif key == 'DOWN': idx = (idx + 1) % n
             elif key == 'SPACE':
-                # Toggle selection
                 if idx in selected_indices: selected_indices.remove(idx)
                 else: selected_indices.add(idx)
-            elif key == 'ENTER':
+            elif key == 'ENTER': 
                 return [options[i] for i in sorted(list(selected_indices))]
-            elif key == 'ESC':
-                return []
-
-            sys.stdout.write(f"\r{CURSOR_UP * n}")
-
+            elif key == 'ESC': return []
+            
+            sys.stdout.write(f"\r{CURSOR_UP * window_height}")
+            
     except KeyboardInterrupt:
         return []
     finally:
