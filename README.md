@@ -2,11 +2,12 @@
 
 **Termella** is a Python library designed to make terminal output rich, colorful, and beautifully formatted with minimal effort.
 
-## 📦 Features
+## 📦 New in v0.0.4
 
-- **Progress Bars**: Smooth, flicker-free progress tracking.
-- **Styled Input**: Colorized user prompts (`cinput`).
-- **Stability**: Improved type safety and edge-case handling.
+- **Intvractive Menus**: Use arrow keys to select options (`select`).
+- **Checkboxes**: Multi-select options with Spacebar (`checkbox`).
+- **Pagination**: Handle long lists cleanly with scrolling limits.
+- **Cross-Platform Input**: Robust keyboard handling for Windows, Linux, and macOS.
 
 ## 🛠 Installation
 

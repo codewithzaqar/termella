@@ -27,6 +27,20 @@ Displays a styled prompt and waits for user input.
 
 ---
 
+## 1.1 Interactive Widgets (`termella.widgets`)
+
+### `select(options, prompt=..., color=..., marker=..., limit=...)`
+**[New in v0.0.4]**
+Renders an interactive menu for single choice selection.
+*    Supports scrolling via `limit`.
+*    Supports cancellation via `ESC`.
+
+### `checkbox(options, prompt=..., color=..., marker=..., limit=...)`
+**[New in v0.0.4]**
+Renders an interactive menu for multiple choice selection.
+*    Toggle with Spacebar.
+*    Returns a list of strings.
+
 ## 2. Core Classes
 
 ### `class Text(content)`
