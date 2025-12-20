@@ -31,3 +31,4 @@ STYLES = {
 }
 
 CARRIAGE_RETURN = "\r"
+CLEAR_EOS = "\033[J"

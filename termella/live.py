@@ -1,6 +1,6 @@
 import sys
 import time
-from .ansi import CURSOR_HIDE, CURSOR_SHOW, CURSOR_UP, CURSOR_DOWN, CLEAR_LINE, CARRIAGE_RETURN
+from .ansi import CURSOR_HIDE, CURSOR_SHOW, CURSOR_UP, CURSOR_DOWN, CLEAR_LINE, CLEAR_EOS, CARRIAGE_RETURN
 
 class Live:
     """
@@ -35,25 +35,21 @@ class Live:
             renderable (str): The multi-line string to display.
         """
         text = str(renderable)
+        if text.endswith('\n'):
+            text = text.rstrip('\n')
         lines = text.split('\n')
         new_height = len(lines)
 
         if self.last_height > 0:
             sys.stdout.write(CURSOR_UP * self.last_height)
-            for _ in range(self.last_height):
-                sys.stdout.write(CLEAR_LINE)
-                sys.stdout.write(CURSOR_DOWN)
-
-            sys.stdout.write(CURSOR_UP * self.last_height)
             sys.stdout.write(CARRIAGE_RETURN)
 
-        sys.stdout.write(text)
-
-        if not text.endswith('\n'):
-            sys.stdout.write('\n')
-
+        sys.stdout.write(CLEAR_EOS)
+        sys.stdout.write(text + "\n")
         sys.stdout.flush()
-        self.last_height = new_height + (0 if text.endswith('\n') else 1)
+
+        self.last_height = new_height
+        
         if self.refresh_rate:
             time.sleep(self.refresh_rate)
 
