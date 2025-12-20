@@ -1,6 +1,6 @@
 from ..core import visible_len
 
-def columns(*widgets, padding=2, align="top"):
+def columns(*widgets, padding=2, align="top", render=False):
     """
     Prints strings/widgets side-by-side.
     Args:
@@ -18,9 +18,10 @@ def columns(*widgets, padding=2, align="top"):
             else:
                 cols_data.append(lines)
     
-    if not any(cols_data): return
+    if not any(cols_data): return "" if render else None
     max_height = max(len(c) for c in cols_data)
-    if max_height == 0: return
+    if max_height == 0: return "" if render else None
+
     col_widths = []
     for col in cols_data:
         w = max(visible_len(line) for line in col) if col else 0
@@ -44,6 +45,7 @@ def columns(*widgets, padding=2, align="top"):
         else:
             aligned_cols.append(col)
 
+    output_lines = []
     for i in range(max_height):
         line_parts = []
         for j, col in enumerate(aligned_cols):
@@ -55,15 +57,30 @@ def columns(*widgets, padding=2, align="top"):
             else:
                 line_parts.append(content)
 
-        print(pad_str.join(line_parts))
+        output_lines.append(pad_str.join(line_parts))
 
-def grid(widgets, cols=3, padding=2):
+    final_str = "\n".join(output_lines)
+
+    if render:
+        return final_str
+    print(final_str)
+
+def grid(widgets, cols=3, padding=2, render=False):
     """
     Arranges a list of widgets into a grid structure.
     """
-    if not widgets: return
+    if not widgets: return "" if render else None
+    
+    grid_rows = []
     for i in range(0, len(widgets), cols):
         chunk = widgets[i : i + cols]
-        columns(*chunk, padding=padding)
-        if i + cols < len(widgets):
-            print()
+        row_str = columns(*chunk, padding=padding, render=True)
+        if row_str:
+            grid_rows.append(row_str)
+
+    final_str = "\n\n".join(grid_rows)
+    final_str = "\n".join(grid_rows)
+    
+    if render:
+        return final_str
+    print(final_str)

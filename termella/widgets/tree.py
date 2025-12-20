@@ -4,7 +4,9 @@ def tree(data, root_name=".", render=False):
     """
     Recursive tree renderer.
     """
-    lines = [str(Text(root_name).style(color="blue", styles="bold"))]
+    lines = []
+    if root_name:
+        lines.append(str(Text(root_name).style(color="blue", styles="bold")))
 
     def _walk(node, prefix):
         keys = list(node.keys())
@@ -21,7 +23,7 @@ def tree(data, root_name=".", render=False):
                 lines.append(f"{prefix}{connector}{key}: {Text(str(val)).style(color='green')}")
 
     _walk(data, "")
-    final = "\n".join(lines)
+    final_str = "\n".join(lines)
 
-    if render: return final
-    print(final)
+    if render: return final_str
+    print(final_str)
