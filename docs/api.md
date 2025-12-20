@@ -29,6 +29,19 @@ Displays a styled prompt and waits for user input.
 
 ## 1.1 Interactive Widgets (`termella.widgets`)
 
+### `columns(*widgets, padding=2, align="top", render=False)`
+**[New in v0.0.5]**
+Renders multiple string blocks side-by-side. Robustly handles ANSI color codes to ensure correct alignment.
+*   **align**: `'top'`, `'center'`, `'bottom'`.
+
+### `grid(widgets, cols=3, padding=2, render=False)`
+**[New in v0.0.5]**
+Arranges a list of widget strings into a grid layout.
+
+### `tree(data, root_name=".", render=False)`
+**[New in v0.0.5]**
+Recursively renders a dictionary as a tree structure.
+
 ### `select(options, prompt=..., color=..., marker=..., limit=...)`
 **[New in v0.0.4]**
 Renders an interactive menu for single choice selection.
@@ -65,8 +78,11 @@ Renders the final string with ANSI escape embedded.
 
 ## 3. Widgets
 
-### `panel(text, color="white", title=None)`
+### `panel(text, color="white", title=None, render=False)`
 Prints a multi-line string enclosed in an ASCII box.
+
+**[Updated v0.0.5]**
+Added `render` parameter. If `True`, returns the string.
 
 - **Parameters**
   - `text` (str): The content to display inside the box. Handles `\n` automatically.
@@ -87,3 +103,10 @@ Prints a dynamic progress bar.
 - **Behavior:**
   - Hides the cursor while updating to prevent flickering.
   - Automatically handles `ZeroDivisionError` if `total` is 0.
+
+### `table(data, headers=..., align="left", render=False)`
+**[Updated v0.0.5]**
+Added `render` parameter.
+
+### `select(...)` / `checkbox(...)`
+Iteractive menus (see [Interaction Guide](interaction.md)).

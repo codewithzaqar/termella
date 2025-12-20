@@ -1,10 +1,7 @@
-# Cookbook
+import sys
+import os
 
-## The Admin Dashboard (v0.0.5)
-
-This example combines **Layouts**, **Tables**, and **Panels** to create a full-screen dashboard view.
-
-```python
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from termella import cprint, panel, table, columns, grid, Text
 
 # 1. Server Stats Table
@@ -40,4 +37,3 @@ dashboard = grid([top_row, log_panel], cols=1, padding=0, render=True)
 # 6. Final Frame
 cprint(Text(" --- ADMIN CONSOLE --- ").style(styles=["bold", "reverse"]))
 print(dashboard)
-```
