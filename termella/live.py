@@ -1,6 +1,7 @@
 import sys
 import time
 from .ansi import CURSOR_HIDE, CURSOR_SHOW, CURSOR_UP, CLEAR_EOS, CARRIAGE_RETURN
+from .widgets import grid
 
 class Live:
     """
@@ -24,8 +25,7 @@ class Live:
         try:
             sys.stdout.write(CURSOR_HIDE)
             sys.stdout.flush()
-        except Exception:
-            pass
+        except Exception: pass
 
     def stop(self):
         self.is_running = False
@@ -33,8 +33,7 @@ class Live:
             sys.stdout.write(CURSOR_SHOW)
             sys.stdout.write("\n")
             sys.stdout.flush()
-        except Exception:
-            pass
+        except Exception: pass
 
     def update(self, renderable):
         """
@@ -42,9 +41,14 @@ class Live:
         Args:
             renderable (str): The multi-line string to display.
         """
-        text = str(renderable)
+        if isinstance(renderable, (list, tuple)):
+            text = grid(renderable, cols=1, render=True)
+        else:
+            text = str(renderable)
+
         if text.endswith('\n'):
             text = text.rstrip('\n')
+            
         lines = text.split('\n')
         new_height = len(lines)
 
