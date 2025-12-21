@@ -1,6 +1,6 @@
 import sys
 import time
-from .ansi import CURSOR_HIDE, CURSOR_SHOW, CURSOR_UP, CURSOR_DOWN, CLEAR_LINE, CLEAR_EOS, CARRIAGE_RETURN
+from .ansi import CURSOR_HIDE, CURSOR_SHOW, CURSOR_UP, CLEAR_EOS, CARRIAGE_RETURN
 
 class Live:
     """
@@ -13,20 +13,28 @@ class Live:
                 live.update(render_function())
                 time.sleep(1)
     """
-    def __init__(self, refresh_rate=None):
+    def __init__(self, refresh_rate=None, auto_refresh=True):
         self.last_height = 0
         self.refresh_rate = refresh_rate
+        self.auto_refresh = auto_refresh
         self.is_running = False
 
     def start(self):
         self.is_running = True
-        sys.stdout.write(CURSOR_HIDE)
-        sys.stdout.flush()
+        try:
+            sys.stdout.write(CURSOR_HIDE)
+            sys.stdout.flush()
+        except Exception:
+            pass
 
     def stop(self):
         self.is_running = False
-        sys.stdout.write(CURSOR_SHOW)
-        print()
+        try:
+            sys.stdout.write(CURSOR_SHOW)
+            sys.stdout.write("\n")
+            sys.stdout.flush()
+        except Exception:
+            pass
 
     def update(self, renderable):
         """
@@ -50,13 +58,13 @@ class Live:
 
         self.last_height = new_height
         
-        if self.refresh_rate:
+        if self.auto_refresh and self.refresh_rate:
             time.sleep(self.refresh_rate)
 
     def __enter__(self):
         self.start()
         return self
     
-    def __exit__(self, exc_type, exc_valm, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop()
         return False
