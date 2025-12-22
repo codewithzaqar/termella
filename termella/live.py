@@ -14,10 +14,14 @@ class Live:
                 live.update(render_function())
                 time.sleep(1)
     """
-    def __init__(self, refresh_rate=None, auto_refresh=True):
+    def __init__(self, refresh=None, auto_refresh=None):
         self.last_height = 0
-        self.refresh_rate = refresh_rate
-        self.auto_refresh = auto_refresh
+        self.refresh = refresh
+        if auto_refresh is None:
+            self.auto_refresh = (refresh is not None)
+        else:
+            self.auto_refresh = auto_refresh
+
         self.is_running = False
 
     def start(self):
@@ -62,8 +66,8 @@ class Live:
 
         self.last_height = new_height
         
-        if self.auto_refresh and self.refresh_rate:
-            time.sleep(self.refresh_rate)
+        if self.auto_refresh and self.refresh:
+            time.sleep(self.refresh)
 
     def __enter__(self):
         self.start()
