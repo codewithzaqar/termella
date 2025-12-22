@@ -28,5 +28,14 @@ class Text:
         if not self._codes: return self.content
         return f"\033[{';'.join(self._codes)}m{self.content}{RESET}"
     
+    def __repr__(self):
+        return f"<Text: {self.content}>"
+    
     def __add__(self, other):
         return str(self) + str(other)
+    
+    def __radd__(self, other):
+        return str(other) + str(self)
+
+    def __format__(self, format_spec):
+        return format(str(self), format_spec)
