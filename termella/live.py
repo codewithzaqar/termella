@@ -2,6 +2,7 @@ import sys
 import time
 from .ansi import CURSOR_HIDE, CURSOR_SHOW, CURSOR_UP, CLEAR_EOS, CARRIAGE_RETURN
 from .widgets import grid
+from .core import Text
 
 class Live:
     """
@@ -21,7 +22,6 @@ class Live:
             self.auto_refresh = (refresh is not None)
         else:
             self.auto_refresh = auto_refresh
-
         self.is_running = False
 
     def start(self):
@@ -38,6 +38,21 @@ class Live:
             sys.stdout.write("\n")
             sys.stdout.flush()
         except Exception: pass
+
+    def log(self, *objects, sep=" ", end="\n"):
+        """
+        Prints a permanent message above the live display.
+        Clears the current live view, prints the text, and prepares for next update.
+        """
+        if self.last_height > 0:
+            sys.stdout.write(CURSOR_UP * self.last_height)
+            sys.stdout.write(CARRIAGE_RETURN)
+            sys.stdout.write(CLEAR_EOS)
+
+        text = sep.join(str(obj) for obj in objects)
+        sys.stdout.write(text + end)
+        sys.stdout.flush()
+        self.last_height = 0
 
     def update(self, renderable):
         """
