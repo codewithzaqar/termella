@@ -2,16 +2,15 @@
 
 **Termella** is a Python library designed to make terminal output rich, colorful, and beautifully formatted with minimal effort.
 
-![Version](https://img.shields.io/badge/version-0.0.5-blue.svg)
+![Version](https://img.shields.io/badge/version-0.0.6-blue.svg)
 ![Licence](https://img.shields.io/badge/license-MIT-green.svg)
 
-## 📦 New in v0.0.5
+## 📦 New in v0.0.6
 
-* **Layouts**: Place widgets side-by-side with `columns`.
-* **Grids**: Automatically arrange items into rows and columns with `grid`.
-* **Trees**: Visualize nested data or directories with `tree`.
-* **Composition**: Nest widgets inside other widgets (e.g., a Tree inside a Panel).
-* **Smart Alignment**: Layouts handle colored text perfecty without breaking alignment.
+* **Live Display Engine**: Update terminal content in-place without flickering.
+* **Dynamic Dashboards**: Combine `Live` with `columns`, `table`, and `panel`.
+* **Live Logging**: Print persistent logs above a running dashboard.
+* **Smart Cleanup**: Ensures cursor visinility and terminal state are restored on exit or crash.
 
 ## 🛠 Installation
 

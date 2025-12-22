@@ -110,3 +110,20 @@ Added `render` parameter.
 
 ### `select(...)` / `checkbox(...)`
 Iteractive menus (see [Interaction Guide](interaction.md)).
+
+## 4. Live Display (`termella.live`)
+
+### `class Live(refresh=None, auto_refresh=None)`
+Contect manager for dynamic output.
+
+#### `update(renderable)`
+Updates the display.
+*   **renderable**: String, Widget (rendered string), or List of widgets.
+*   Moves cursor up, clears old content, prints new content.
+
+#### `log(*objects, sep=" ", end="\n")`
+Prints a message above the current live display.
+*   Temporarily clears live view, prints log, resets internal height tracker.
+
+#### `start()` / `stop()`
+Manually control the live display lifecycle (hide/show cursor).

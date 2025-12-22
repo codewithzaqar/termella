@@ -1,43 +1,37 @@
 # Cookbook
 
-## The Admin Dashboard (v0.0.5)
+## The Worker Monitor (v0.0.6)
 
-This example combines **Layouts**, **Tables**, and **Panels** to create a full-screen dashboard view.
+A pattern for monitoring a long-running task.
 
 ```python
-from termella import cprint, panel, table, columns, grid, Text
+import time
+import random
+from termella import Live, panel, progress_bar, Text, grid
 
-# 1. Server Stats Table
-stats_data = [
-    ["CPU", "12%", "Cool"],
-    ["RAM", "4.2GB", "OK"],
-    ["Disk", "85%", "Warn"]
-]
-# Render to string
-stats_tbl = table(
-    stats_data,
-    headers=["Metric", "Value", "Status"],
-    border_color="blue",
-    render=True
-)
-# Wrap in Panel
-stats_panel = panel(stats_tbl, title="Hardware", color="blue", render=True)
+def get_progress_panel(percent):
+    chars = int(20 * (percent / 100))
+    bar = "█" * chars + "-" * (20 - chars)
+    return panel(f"[{bar}] {percent}%", title="Progress", color="cyan", render=True)
 
-# 2. Network Info Panel
-net_info = "IO: 192.168.1.50\nPort: 8080\nSSL: Enabled"
-net_panel = panel(net_info, title="Network", color="green", render=True)
+def get_logs_panel(logs):
+    content = "\n".join(logs[-5:])
+    return panel(content, title="Recent Activity", color="dim", render=True)
 
-# 3. Recent Logs Panel
-logs = "10:00 - Login Success\n10:05 - Upload Complete\n10:12 - Error: Timeout"
-log_panel = panel(logs, title="System Logs", color="yellow", render=True)
+def run_monitor():
+    logs = []
 
-# 4. Compose: Top Row (Status + Network)
-top_row = columns(stats_panel, net_panel, align="top", padding=1, render=True)
+    with Live(refresh=0.1) as live:
+        for i in range(101):
+            if random.random() < 0.1:
+                msg = f"Processed batch #{i}"
+                logs.append(msg)
+                live.log(Text(f"[LOG] {msg}").style(color="green"))
 
-# 5. Compose: Full Dashboard (Top Row over Logs)
-dashboard = grid([top_row, log_panel], cols=1, padding=0, render=True)
+            p_prog = get_progress_panel(i)
+            p_logs = get_logs_panel(logs)
 
-# 6. Final Frame
-cprint(Text(" --- ADMIN CONSOLE --- ").style(styles=["bold", "reverse"]))
-print(dashboard)
+            live.update(grid([p_prog, p_logs], cols=1, render=True))
+
+run_monitor()
 ```
