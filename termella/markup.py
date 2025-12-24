@@ -1,8 +1,7 @@
 import re
 from .core import Text
-from .ansi import COLORS, BG_COLORS, STYLES
 
-TAG_RE = re.compile(r'\[([\w\s]+)\](.*?)\[/\]')
+TAG_RE = re.compile(r'\[(.*?)\]')
 
 def parse(text):
     """
@@ -14,40 +13,44 @@ def parse(text):
     Limitations (dev0):
         - No nested tags yet (e.g. [red][bold]Hi[/][/])
     """
-    final_text = Text("")
-    last_pos = 0
+    if "[" not in text:
+        return Text(text)
+    
+    parts = TAG_RE.split(text)
 
-    for match in TAG_RE.finditer(text):
-        start, end = match.span()
-        if start > last_pos:
-            final_text += Text(text[last_pos:start])
+    final_output = Text("")
+    style_stack = []
 
-        tag_str = match.group(1)
-        content = match.group(2)
+    for i, part in enumerate(parts):
+        if i % 2 == 0:
+            if not part: continue
+            chunk = Text(part)
+            for style_def in style_stack:
+                tokens = style_def.split()
+                chunk.style(color=tokens[0], styles=tokens[1:])
+                c_val = None
+                bg_val = None
+                s_vals = []
 
-        args = tag_str.split()
+                from .ansi import COLORS, BG_COLORS, STYLES
+                for token in tokens:
+                    if token in COLORS: c_val = token
+                    elif token in BG_COLORS: bg_val = token
+                    elif token in STYLES: s_vals.append(token)
 
-        c_val = None
-        bg_val = None
-        s_vals = []
-        
-        for arg in args:
-            if arg in COLORS:
-                c_val = arg
-            elif arg in BG_COLORS:
-                bg_val = arg
-            elif arg in STYLES:
-                s_vals.append(arg)
+                chunk.style(color=c_val, bg=bg_val, styles=s_vals)
 
-        styled_chunk = Text(content).style(color=c_val, bg=bg_val, styles=s_vals)
-        final_text += styled_chunk
+            final_output += chunk
 
-        last_pos = end
+        else:
+            tag = part.strip()
+            if tag == "/":
+                if style_stack:
+                    style_stack.pop()
+            else:
+                style_stack.append(tag)
 
-    if last_pos < len(text):
-        final_text += Text(text[last_pos:])
-
-    return final_text
+    return final_output
 
 def print_tag(text, end="\n"):
     """
