@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from termella import print_tag
 
 def main():
-    print("--- Termella v0.0.7.dev6 (Syntax Fixes) ---")
+    print("--- Termella v0.0.7.dev3 (Syntax Fixes) ---")
     print()
 
     # 1. Literal Brackets using Raw Strings (Recommended)
