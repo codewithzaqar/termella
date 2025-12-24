@@ -1,6 +1,6 @@
 import re
 from .core import Text
-from .ansi import COLORS, BG_COLORS, STYLES
+from .ansi import COLORS, BG_COLORS, STYLES, rgb_fg, rgb_bg, link_start, link_end
 
 # Use raw string for regex pattern
 TAG_RE = re.compile(r'(?<!\\)\[(.*?)(?<!\\)\]')
@@ -30,40 +30,56 @@ def parse(text):
     """
     Parses nested markup tags with escape support.
     """
-    if "[" not in text:
-        return Text(unescape(text))
+    if "[" not in text: return Text(unescape(text))
 
     parts = TAG_RE.split(text)
     
     final_output = Text("")
     style_stack = [] 
 
+    def apply_tag(chunk, tag_str):
+        if tag_str.startswith("link="):
+            url = tag_str[5:]
+            pass
+
+        elif tag_str.startswith("rgb("):
+            try:
+                content = tag_str[4:-1]
+                r, g, b = map(int, content.split(','))
+                code = rgb_fg(r, g, b)
+                chunk.add_raw_code(code)
+                return
+            except:
+                pass
+
+        elif tag_str.startswith("bg_rgb("):
+            try:
+                content = tag_str[7:-1]
+                r, g, b = map(int, content.split(','))
+                code = rgb_bg(r, g, b)
+                chunk.add_raw_code(code)
+                return
+            except:
+                pass
+
+        style_def = THEME.get(tag_str, tag_str)
+        tokens = style_def.split()
+        for token in tokens:
+            if token in COLORS: chunk.style(color=token)
+            elif token in BG_COLORS: chunk.style(bg=token)
+            elif token in STYLES: chunk.style(styles=token)
+
     for i, part in enumerate(parts):
         if i % 2 == 0:
             if not part: continue
-            clean_text = unescape(part)
-            chunk = Text(clean_text)
-            
-            for style_key in style_stack:
-                style_def = THEME.get(style_key, style_key)
-                tokens = style_def.split()
-                c_val = None
-                bg_val = None
-                s_vals = []
-                
-                for token in tokens:
-                    if token in COLORS: c_val = token
-                    elif token in BG_COLORS: bg_val = token
-                    elif token in STYLES: s_vals.append(token)
-                
-                chunk.style(color=c_val, bg=bg_val, styles=s_vals)
+            chunk = Text(part.replace(r'\[', '[').replace(r'\]', ']'))
+
+            for tag in style_stack:
+                apply_tag(chunk, tag)
 
             final_output += chunk
-            
         else:
-            tag = part.strip()
-            tag = unescape(tag)
-            
+            tag = part.strip().replace(r'\[', '[').replace(r'\]', ']')
             if tag == "/":
                 if style_stack: style_stack.pop()
             else:

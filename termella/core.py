@@ -23,6 +23,12 @@ class Text:
                 if s in STYLES: self._codes.append(STYLES[s])
         return self
     
+    def add_raw_code(self, code):
+        """Injects a raw ANSI code string."""
+        if code:
+            self._codes.append(code)
+        return self
+    
     def __str__(self):
         """Render the final ANSI string."""
         if not self._codes: return self.content

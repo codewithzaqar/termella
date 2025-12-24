@@ -14,6 +14,18 @@ CURSOR_UP = "\033[A"
 CURSOR_DOWN = "\033[B"
 CLEAR_LINE = "\033[2K"
 
+def link_start(url):
+    return f"\033]8;;{url}\033\\"
+
+def link_end():
+    return "\033]8;;\033\\"
+
+def rgb_fg(r, g, b):
+    return f"38;2;{r};{g};{b}"
+
+def rgb_bg(r, g, b):
+    return f"48;2;{r};{g};{b}"
+
 COLORS = {
     "black": "30", "red": "31", "green": "32", "yellow": "33",
     "blue": "34", "magenta": "35", "cyan": "36", "white": "37",
