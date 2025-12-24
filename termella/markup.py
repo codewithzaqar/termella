@@ -5,6 +5,20 @@ from .ansi import COLORS, BG_COLORS, STYLES
 # Use raw string for regex pattern
 TAG_RE = re.compile(r'(?<!\\)\[(.*?)(?<!\\)\]')
 
+THEME = {
+    "error": "red bold",
+    "warn": "yellow",
+    "info": "cyan",
+    "success": "green bold"
+}
+
+def add_alias(name, style_str):
+    """
+    Registers a custom tag alias.
+    Usage: add_alias("alert", "white bg_red bold")
+    """
+    THEME[name] = style_str
+
 def unescape(s):
     r"""
     Replaces \[ with [ and \] with ].
@@ -30,7 +44,8 @@ def parse(text):
             clean_text = unescape(part)
             chunk = Text(clean_text)
             
-            for style_def in style_stack:
+            for style_key in style_stack:
+                style_def = THEME.get(style_key, style_key)
                 tokens = style_def.split()
                 c_val = None
                 bg_val = None
