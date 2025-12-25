@@ -1,6 +1,6 @@
 import re
 from .core import Text
-from .ansi import COLORS, BG_COLORS, STYLES, rgb_fg, rgb_bg
+from .ansi import COLORS, BG_COLORS, STYLES, rgb_fg, rgb_bg, link_start, link_end
 
 # Use raw string for regex pattern
 TAG_RE = re.compile(r'(?<!\\)\[(.*?)(?<!\\)\]')
@@ -31,7 +31,6 @@ def parse(text):
     Parses nested markup tags with escape support.
     """
     if "[" not in text: return Text(unescape(text))
-
     parts = TAG_RE.split(text)
     
     final_output = Text("")
@@ -39,6 +38,12 @@ def parse(text):
 
     def apply_tag(chunk, tag_str):
         if not tag_str: return
+
+        if tag_str.startswith("link="):
+            url = tag_str[5:]
+            chunk.add_raw_code(link_start(url))
+            chunk.add_raw_suffix(link_end())
+            return
 
         if tag_str.startswith("rgb("):
             try:
@@ -73,9 +78,7 @@ def parse(text):
 
             final_output += chunk
         else:
-            tag = part.strip()
-            tag = unescape(tag)
-            
+            tag = part.strip().replace(r'\[', '[').replace(r'\]', ']')
             if tag == "/":
                 if style_stack: style_stack.pop()
             else:

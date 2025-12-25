@@ -12,6 +12,7 @@ class Text:
     def __init__(self, content):
         self.content = str(content)
         self._codes = []
+        self._suffix_codes = []
 
     def style(self, color=None, bg=None, styles=None):
         """Apply styles to the text object."""
@@ -25,14 +26,34 @@ class Text:
     
     def add_raw_code(self, code):
         """Injects a raw ANSI code string."""
-        if code:
-            self._codes.append(code)
+        if code: self._codes.append(str(code))
+        return self
+
+    def add_raw_suffix(self, code):
+        """Injects a raw ANSI code string at the end (before reset)."""
+        if code: self._suffix_codes.append(str(code))
         return self
     
     def __str__(self):
         """Render the final ANSI string."""
-        if not self._codes: return self.content
-        return f"\033[{';'.join(self._codes)}m{self.content}{RESET}"
+        if not self._codes and not self._suffix_codes:
+            return self.content
+        
+        prefix = ""
+        if self._codes:
+            pass
+
+        parts = []
+        csi_params = [c for c in self._codes if c[0].isdigit()]
+        if csi_params:
+            parts.append(f"\033[{';'.join(csi_params)}m")
+
+        raw_seqs = [c for c in self._codes if not c[0].isdigit()]
+        parts.extend(raw_seqs)
+        parts.append(self.content)
+        parts.extend(self._suffix_codes)
+        parts.append(RESET)
+        return "".join(parts)
     
     def __repr__(self):
         return f"<Text: {self.content}>"
