@@ -127,3 +127,22 @@ Prints a message above the current live display.
 
 #### `start()` / `stop()`
 Manually control the live display lifecycle (hide/show cursor).
+
+## 5. Markup (`termella.markup`)
+
+### `print_tag(text, end="\n")`
+**[New in v0.0.7]**
+Parses a markup string and prints it immediately.
+*   **text**: String containing tags like `[red]...[/]`.
+
+### `parse(text)`
+**[New in v0.0.7]**
+Parses a markup string into a `Text` object.
+*   **Returns**: `termella.core.Text`
+*   **Robustness**: Handles unclosed tags automatically.
+
+### `add_alias(name, style_str)`
+**[New in v0.0.7]**
+Registers a global alias for the markup parser.
+*   **name**: The tag name (e.g., "alert").
+*   **style_str**: The styles to apply (e.g., "red bold").

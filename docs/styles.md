@@ -36,3 +36,8 @@
 | `underline` | Adds a line beneath text |
 | `blink` | Makes text blink (terminal dependent) |
 | `reverse` | Swaps foreground and background colors |
+
+## Markup Macros (v0.0.7)
+*   `rgb(r,g,b)`
+*   `bg_rgb(r,g,b)`
+*   `link=url`
