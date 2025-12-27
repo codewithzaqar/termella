@@ -3,10 +3,12 @@ import time
 from .ansi import (
     ALT_SCREEN_ENTER, ALT_SCREEN_EXIT,
     CURSOR_HIDE, CURSOR_SHOW,
-    CLEAR_SCREEN
+    CLEAR_SCREEN, CLEAR_EOS
 )
 from .widgets import grid
 from .input.listener import InputListener
+
+CURSOR_HOME = "\033[H"
 
 class App:
     """
@@ -61,6 +63,7 @@ class App:
             # --- SETUP ---
             sys.stdout.write(ALT_SCREEN_ENTER)
             sys.stdout.write(CURSOR_HIDE)
+            sys.stdout.write(CLEAR_SCREEN)
             sys.stdout.flush()
 
             self._running = True
@@ -78,8 +81,9 @@ class App:
                 else:
                     content = str(view)
 
-                sys.stdout.write(CLEAR_SCREEN)
+                sys.stdout.write(CURSOR_HOME)
                 sys.stdout.write(content)
+                sys.stdout.write(CLEAR_EOS)
                 sys.stdout.flush()
 
                 time.sleep(self.refresh_rate)
