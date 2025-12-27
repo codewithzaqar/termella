@@ -44,3 +44,8 @@ STYLES = {
 
 CARRIAGE_RETURN = "\r"
 CLEAR_EOS = "\033[J"
+
+# Screen Buffer Controls (New in v0.0.8)
+ALT_SCREEN_ENTER = "\033[?1049h"
+ALT_SCREEN_EXIT = "\033[?1049l"
+CLEAR_SCREEN = "\033[2J\033[H"
