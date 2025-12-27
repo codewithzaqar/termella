@@ -3,9 +3,10 @@ import time
 from .ansi import (
     ALT_SCREEN_ENTER, ALT_SCREEN_EXIT,
     CURSOR_HIDE, CURSOR_SHOW,
-    CLEAR_SCREEN, CARRIAGE_RETURN
+    CLEAR_SCREEN
 )
 from .widgets import grid
+from .input.listener import InputListener
 
 class App:
     """
@@ -15,6 +16,7 @@ class App:
     def __init__(self, refresh_rate=0.1):
         self._running = False
         self.refresh_rate = refresh_rate
+        self.listener = InputListener()
 
     def on_start(self):
         """Override this to run logic before the loop starts."""
@@ -27,6 +29,14 @@ class App:
     def on_update(self):
         """Override this to define the main loop logic."""
         pass
+
+    def on_key(self, key):
+        """
+        Override this to handle keypresses.
+        key: 'a', 'ENTER', 'UP', 'ESC', etc.
+        """
+        if key == 'q' or key == 'ESC':
+            self.exit()
 
     def render(self):
         """
@@ -58,6 +68,9 @@ class App:
 
             # --- LOOP ---
             while self._running:
+                if self.listener.key_available():
+                    key = self.listener.read_key()
+                    self.on_key(key)
                 self.on_update()
                 view = self.render()
                 if isinstance(view, (list, tuple)):

@@ -7,6 +7,16 @@ class InputListener:
     Returns normalized key names: 'UP', 'DOWN', 'ENTER', or the char.
     """
 
+    def key_available(self):
+        """Returns True if a key is waiting to be read."""
+        if os.name == 'nt':
+            import msvcrt
+            return msvcrt.kbhit()
+        else:
+            import select
+            dr, dw, de = select.select([sys.stdin], [], [], 0)
+            return bool(dr)
+
     def read_key(self):
         """Waits for a single keypress and returns it."""
         if os.name == 'nt':
