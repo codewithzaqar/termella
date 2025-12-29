@@ -7,7 +7,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="termella",
-    version="0.0.9.dev0",
+    version="0.0.9.dev1",
     description="A Python library for rich text and beautiful formatting in the terminal.",
     long_description=long_description,
     long_description_content_type="text/markdown",
