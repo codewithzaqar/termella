@@ -9,12 +9,26 @@ class InputListener:
     Reads a single keypress from STDIN without blocking line buffering.
     Returns normalized key names: 'UP', 'DOWN', 'ENTER', or the char.
     """
+    def __init__(self):
+        self._win_old_mode = None
+
+    def enable_mouse(self):
+        if os.name == 'nt':
+            from .win_input import enable_mouse_mode
+            self._win_old_mode = enable_mouse_mode()
+
+    def disable_mouse(self):
+        if os.name == 'nt' and self._win_old_mode:
+            from .win_input import disable_mouse_mode
+            disable_mouse_mode(self._win_old_mode)
 
     def key_available(self):
         """Returns True if a key is waiting to be read."""
         if os.name == 'nt':
             import msvcrt
             return msvcrt.kbhit()
+            from .win_input import get_num_events
+            return get_num_events() > 0
         else:
             import select
             dr, dw, de = select.select([sys.stdin], [], [], 0)
@@ -23,23 +37,44 @@ class InputListener:
     def read_key(self):
         """Waits for a single keypress and returns it."""
         if os.name == 'nt':
-            return self._read_windows()
+            return self._read_windows_api()
         else:
             return self._read_unix()
         
-    def _read_windows(self):
-        import msvcrt
-        key = msvcrt.getch()
-        if key == b'\r': return 'ENTER'
-        if key == b' ': return 'SPACE'
-        if key == b'\x1b': return 'ESC' # Windows usually handles ESC directly
-        if key == b'\xe0': # Special keys (arrows)
-            key = msvcrt.getch()
-            if key == b'H': return 'UP'
-            if key == b'P': return 'DOWN'
-            if key == b'K': return 'LEFT'
-            if key == b'M': return 'RIGHT'
-        return key.decode('utf-8', 'ignore')
+    def _read_windows_api(self):
+        from .win_input import read_input_record, KEY_EVENT, MOUSE_EVENT
+
+        while True:
+            record = read_input_record()
+
+            if record.EventType == KEY_EVENT:
+                if not record.Event.KeyEvent.bKeyDown: continue
+
+                vk = record.Event.KeyEvent.wVirtualKeyCode
+                char = record.Event.KeyEvent.uChar.UnicodeChar
+
+                if vk == 0x26: return 'UP'
+                if vk == 0x28: return 'DOWN'
+                if vk == 0x25: return 'LEFT'
+                if vk == 0x27: return 'RIGHT'
+                if vk == 0x1B: return 'ESC'
+                if vk == 0x0D: return 'ENTER'
+
+                if char > 0:
+                    return chr(char)
+                
+            elif record.EventType == MOUSE_EVENT:
+                x = record.Event.MouseEvent.dwMousePosition.X
+                y = record.Event.MouseEvent.dwMousePosition.Y
+                btn = record.Event.MouseEvent.dwButtonState
+
+                x += 1
+                y += 1
+
+                if btn == 1: return f"CLICK_LEFT {x} {y}"
+                if btn == 2: return f"CLICK_RIGHT {x} {y}"
+
+                return None
     
     def _read_unix(self):
         import tty

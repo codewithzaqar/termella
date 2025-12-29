@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 from .ansi import (
@@ -67,7 +68,7 @@ class App:
             sys.stdout.write(ALT_SCREEN_ENTER)
             sys.stdout.write(CURSOR_HIDE)
             if self.mouse_enabled:
-                sys.stdout.write(MOUSE_ON)
+                if os.name != 'nt': sys.stdout.write(MOUSE_ON)
             sys.stdout.flush()
 
             self._running = True
@@ -108,7 +109,8 @@ class App:
             # --- CLEANUP ---
             self.on_stop()
             if self.mouse_enabled:
-                sys.stdout.write(MOUSE_OFF)
+                if os.name != 'nt': sys.stdout.write(MOUSE_OFF)
+                self.listener.disable_mouse()
             sys.stdout.write(ALT_SCREEN_EXIT)
             sys.stdout.write(CURSOR_SHOW)
             sys.stdout.flush()
