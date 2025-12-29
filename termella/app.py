@@ -3,7 +3,8 @@ import time
 from .ansi import (
     ALT_SCREEN_ENTER, ALT_SCREEN_EXIT,
     CURSOR_HIDE, CURSOR_SHOW,
-    CLEAR_SCREEN, CLEAR_EOS
+    CLEAR_SCREEN, CLEAR_EOS, CURSOR_HOME,
+    MOUSE_ON, MOUSE_OFF
 )
 from .widgets import grid
 from .input.listener import InputListener
@@ -15,9 +16,10 @@ class App:
     Base class for Full-Screen TUI Applications.
     Handles the Event Loop and Screen Buffer management.
     """
-    def __init__(self, refresh_rate=0.1):
+    def __init__(self, refresh_rate=0.1, mouse=False):
         self._running = False
         self.refresh_rate = refresh_rate
+        self.mouse_enabled = mouse
         self.listener = InputListener()
 
     def on_start(self):
@@ -37,8 +39,9 @@ class App:
         Override this to handle keypresses.
         key: 'a', 'ENTER', 'UP', 'ESC', etc.
         """
-        if key == 'q' or key == 'ESC':
-            self.exit()
+        if key == 'q' or key == 'ESC': self.exit()
+
+    def on_click(self, x, y, btn): pass
 
     def render(self):
         """
@@ -63,7 +66,8 @@ class App:
             # --- SETUP ---
             sys.stdout.write(ALT_SCREEN_ENTER)
             sys.stdout.write(CURSOR_HIDE)
-            sys.stdout.write(CLEAR_SCREEN)
+            if self.mouse_enabled:
+                sys.stdout.write(MOUSE_ON)
             sys.stdout.flush()
 
             self._running = True
@@ -72,9 +76,19 @@ class App:
             # --- LOOP ---
             while self._running:
                 if self.listener.key_available():
-                    key = self.listener.read_key()
-                    self.on_key(key)
+                    key_data = self.listener.read_key()
+                    if key_data:
+                        if key_data.startswith("CLICK_"):
+                            parts = key_data.split()
+                            btn_type = parts[0]
+                            x = int(parts[1])
+                            y = int(parts[2])
+                            self.on_click(x, y, btn_type)
+                        else:
+                            self.on_key(key_data)
+
                 self.on_update()
+
                 view = self.render()
                 if isinstance(view, (list, tuple)):
                     content = grid(view, cols=1, render=True)
@@ -93,6 +107,8 @@ class App:
         finally:
             # --- CLEANUP ---
             self.on_stop()
+            if self.mouse_enabled:
+                sys.stdout.write(MOUSE_OFF)
             sys.stdout.write(ALT_SCREEN_EXIT)
             sys.stdout.write(CURSOR_SHOW)
             sys.stdout.flush()

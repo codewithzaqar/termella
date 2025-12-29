@@ -1,5 +1,8 @@
 import sys
 import os
+import re
+
+MOUSE_RE = re.compile(r'\x1b\[<(\d+);(\d+);(\d+)([Mm])')
 
 class InputListener:
     """
@@ -42,6 +45,7 @@ class InputListener:
         import tty
         import termios
         import select
+
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
@@ -52,14 +56,29 @@ class InputListener:
             if ch == '\x1b':
                 # Check if there is more data ready to read (timeout 0.1s)
                 # If no data, it's just the ESC key.
-                dr, dw, de = select.select([sys.stdin], [], [], 0.1)
-                if not dr:
-                    return 'ESC'
-                seq = sys.stdin.read(2)
-                if seq == '[A': return 'UP'
-                if seq == '[B': return 'DOWN'
-                if seq == '[C': return 'RIGHT'
-                if seq == '[D': return 'LEFT'
+                dr, dw, de = select.select([sys.stdin], [], [], 0.01)
+                if not dr: return 'ESC'
+                seq = sys.stdin.read(10)
+                full_seq = '\x1b' + seq
+
+                match = MOUSE_RE.match(full_seq)
+                if match:
+                    btn = int(match.group(1))
+                    x = int(match.group(2))
+                    y = int(match.group(3))
+                    action = match.group(4)
+
+                    if action == 'M':
+                        if btn == 0: return f"CLICK_LEFT {x} {y}"
+                        if btn == 2: return f"CLICK_RIGHT {x} {y}"
+                        if btn >= 64: return "SCROLL"
+                    return None
+
+                if seq.startswith('[A'): return 'UP'
+                if seq.startswith('[B'): return 'DOWN'
+                if seq.startswith('[C'): return 'RIGHT'
+                if seq.startswith('[D'): return 'LEFT'
+                
                 return 'ESC'
             
             if ch == '\r' or ch == '\n': return 'ENTER'

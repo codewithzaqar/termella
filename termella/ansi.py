@@ -48,4 +48,9 @@ CLEAR_EOS = "\033[J"
 # Screen Buffer Controls (New in v0.0.8)
 ALT_SCREEN_ENTER = "\033[?1049h"
 ALT_SCREEN_EXIT = "\033[?1049l"
+CURSOR_HOME = "\033[H"
 CLEAR_SCREEN = "\033[2J\033[H"
+
+# Mouse Tracking (SGR 1006 Mode is preferred for modern terminals)
+MOUSE_ON = "\033[?1000h\033[?1006h\033[?1015h"
+MOUSE_OFF = "\033[?1000l\033[?1006l\033[?1015l"
