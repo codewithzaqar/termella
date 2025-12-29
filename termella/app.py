@@ -22,6 +22,7 @@ class App:
         self.refresh_rate = refresh_rate
         self.mouse_enabled = mouse
         self.listener = InputListener()
+        self._last_update = 0
 
     def on_start(self):
         """Override this to run logic before the loop starts."""
@@ -55,6 +56,22 @@ class App:
         """Stops the application loop."""
         self._running = False
 
+    def _draw_frame(self):
+        self.on_update()
+
+        view = self.render()
+        if isinstance(view, (list, tuple)):
+            content = grid(view, cols=1, render=True)
+        else:
+            content = str(view)
+
+        sys.stdout.write(CURSOR_HOME)
+        sys.stdout.write(content)
+        sys.stdout.write(CLEAR_EOS)
+        sys.stdout.flush()
+
+        self._last_update = time.time()
+
     def run(self):
         """
         Starts the application.
@@ -69,39 +86,36 @@ class App:
             sys.stdout.write(CURSOR_HIDE)
             if self.mouse_enabled:
                 if os.name != 'nt': sys.stdout.write(MOUSE_ON)
+                self.listener.enable_mouse()
             sys.stdout.flush()
 
             self._running = True
             self.on_start()
 
+            self._draw_frame()
+
             # --- LOOP ---
             while self._running:
-                if self.listener.key_available():
-                    key_data = self.listener.read_key()
-                    if key_data:
-                        if key_data.startswith("CLICK_"):
-                            parts = key_data.split()
-                            btn_type = parts[0]
-                            x = int(parts[1])
-                            y = int(parts[2])
-                            self.on_click(x, y, btn_type)
-                        else:
-                            self.on_key(key_data)
+                now = time.time()
+                time_since_update = now - self._last_update
+                wait_time = max(0, self.refresh_rate - time_since_update)
 
-                self.on_update()
+                has_input = self.listener.wait_for_input(wait_time)
 
-                view = self.render()
-                if isinstance(view, (list, tuple)):
-                    content = grid(view, cols=1, render=True)
-                else:
-                    content = str(view)
+                if has_input:
+                    while self.listener.key_available():
+                        key_data = self.listener.read_key()
+                        if key_data:
+                            if key_data.startswith("CLICK_"):
+                                parts = key_data.split()
+                                self.on_click(int(parts[1]), int(parts[2]), parts[0])
+                            else:
+                                self.on_key(key_data)
 
-                sys.stdout.write(CURSOR_HOME)
-                sys.stdout.write(content)
-                sys.stdout.write(CLEAR_EOS)
-                sys.stdout.flush()
+                    self._draw_frame()
 
-                time.sleep(self.refresh_rate)
+                elif wait_time <= 0 or (time.time() - self._last_update >= self.refresh_rate):
+                    self._draw_frame()
 
         except KeyboardInterrupt:
             pass

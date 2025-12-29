@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import time
 
 MOUSE_RE = re.compile(r'\x1b\[<(\d+);(\d+);(\d+)([Mm])')
 
@@ -122,3 +123,20 @@ class InputListener:
             return ch
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+    def wait_for_input(self, timeout):
+        """
+        Blocks until input is available or timeout expires.
+        Returns True if input is ready, False if timeout.
+        """
+        if os.name == 'nt':
+            start = time.time()
+            while (time.time() - start) < timeout:
+                if self.key_available():
+                    return True
+                time.sleep(0.01)
+            return False
+        else:
+            import select
+            dr, dw, de = select.select([sys.stdin], [], [], timeout)
+            return bool(dr)
