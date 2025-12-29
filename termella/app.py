@@ -23,6 +23,8 @@ class App:
         self.mouse_enabled = mouse
         self.listener = InputListener()
         self._last_update = 0
+        self.width = 80
+        self.height = 24
 
     def on_start(self):
         """Override this to run logic before the loop starts."""
@@ -45,6 +47,10 @@ class App:
 
     def on_click(self, x, y, btn): pass
 
+    def on_resize(self, width, height):
+        """Called when terminal dimensions change."""
+        pass
+
     def render(self):
         """
         Return the UI to display.
@@ -56,7 +62,20 @@ class App:
         """Stops the application loop."""
         self._running = False
 
+    def _check_resize(self):
+        try:
+            size = os.get_terminal_size()
+            if size.columns != self.width or size.lines != self.height:
+                self.width = size.columns
+                self.height = size.lines
+                self.on_resize(self.width, self.height)
+                sys.stdout.write(CLEAR_SCREEN)
+        except OSError:
+            pass
+
     def _draw_frame(self):
+        self._check_resize()
+
         self.on_update()
 
         view = self.render()
@@ -81,6 +100,7 @@ class App:
         4. Restores Terminal state on exit.
         """
         try:
+            self._check_resize()
             # --- SETUP ---
             sys.stdout.write(ALT_SCREEN_ENTER)
             sys.stdout.write(CURSOR_HIDE)
@@ -91,15 +111,12 @@ class App:
 
             self._running = True
             self.on_start()
-
             self._draw_frame()
 
             # --- LOOP ---
             while self._running:
                 now = time.time()
-                time_since_update = now - self._last_update
-                wait_time = max(0, self.refresh_rate - time_since_update)
-
+                wait_time = max(0, self.refresh_rate - (now - self._last_update))
                 has_input = self.listener.wait_for_input(wait_time)
 
                 if has_input:
@@ -111,10 +128,8 @@ class App:
                                 self.on_click(int(parts[1]), int(parts[2]), parts[0])
                             else:
                                 self.on_key(key_data)
-
                     self._draw_frame()
-
-                elif wait_time <= 0 or (time.time() - self._last_update >= self.refresh_rate):
+                elif wait_time <= 0:
                     self._draw_frame()
 
         except KeyboardInterrupt:
