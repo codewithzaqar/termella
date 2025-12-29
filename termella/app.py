@@ -25,6 +25,14 @@ class App:
         self._last_update = 0
         self.width = 80
         self.height = 24
+        self.focusable_widgets = []
+        self.focus_idx = 0
+
+    def add_focusable(self, widget):
+        """Register a widget to participate in Tab navigation."""
+        self.focusable_widgets.append(widget)
+        if len(self.focusable_widgets) == 1:
+            widget.on_focus()
 
     def on_start(self):
         """Override this to run logic before the loop starts."""
@@ -44,6 +52,26 @@ class App:
         key: 'a', 'ENTER', 'UP', 'ESC', etc.
         """
         if key == 'q' or key == 'ESC': self.exit()
+
+        if key == 'TAB' or key == 'DOWN':
+            self._move_focus(1)
+        elif key == 'UP':
+            self._move_focus(-1)
+        else:
+            if self.focusable_widgets:
+                current = self.focusable_widgets[self.focus_idx]
+                current.on_key(key)
+
+    def _move_focus(self, direction):
+        if not self.focusable_widgets: return
+
+        current = self.focusable_widgets[self.focus_idx]
+        current.on_blur()
+
+        self.focus_idx = (self.focus_idx + direction) % len(self.focusable_widgets)
+
+        new_w = self.focusable_widgets[self.focus_idx]
+        new_w.on_focus()
 
     def on_click(self, x, y, btn): pass
 
