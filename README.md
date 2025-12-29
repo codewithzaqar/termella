@@ -2,16 +2,15 @@
 
 **Termella** is a Python library designed to make terminal output rich, colorful, and beautifully formatted with minimal effort.
 
-![Version](https://img.shields.io/badge/version-0.0.7-blue.svg)
+![Version](https://img.shields.io/badge/version-0.0.8-blue.svg)
 ![Licence](https://img.shields.io/badge/license-MIT-green.svg)
 
-## 📦 New in v0.0.7
-
-* **Markup Language**: Style text inline like `[red]Hello[/]`.
-* **TrueColor Support**: Use `[rgb(255,0,100)]` for millions of colors.
-* **Hyperlinks**: Clickable text with `[link=https://example.com]Click Me[/]`.
-* **Semantic Themes**: Defin aliases like `[error]` or `[h1]`.
-* **Nested Styles**: Combine styles cleanly `[bold][red]Text[/][/]`. 
+## ✨ New in v0.0.8
+*   **App Architecture**: Build full-screen applications that restore terminal history on exit.
+*   **Event Loop**: Efficient hybrid loop handling inputs and animations.
+*   **Input Handling**: Non-blocking keyboard support (`on_key`).
+*   **Mouse Support**: Click handling (`on_click`) for Unix/Windows.
+*   **Responsiveness**: Automatic resize detection (`on_resize`).
 
 ## 🛠 Installation
 

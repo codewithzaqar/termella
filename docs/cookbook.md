@@ -1,37 +1,57 @@
-# Cookbook
+# 🍳 Cookbook
 
-## The Worker Monitor (v0.0.6)
+## The File Navigator (v0.0.8)
 
-A pattern for monitoring a long-running task.
+A simple file browser using the App framework.
 
 ```python
-import time
-import random
-from termella import Live, panel, progress_bar, Text, grid
+import os
+from termella import App, panel, select, grid
 
-def get_progress_panel(percent):
-    chars = int(20 * (percent / 100))
-    bar = "█" * chars + "-" * (20 - chars)
-    return panel(f"[{bar}] {percent}%", title="Progress", color="cyan", render=True)
+class FileManager(App):
+    def on_start(self):
+        self.path = os.getcwd()
+        self.files = []
+        self.selected_idx = 0
+        self.refresh_files()
 
-def get_logs_panel(logs):
-    content = "\n".join(logs[-5:])
-    return panel(content, title="Recent Activity", color="dim", render=True)
+    def refresh_files(self):
+        try:
+            self.files = [".."] + [f for f in os.listdir(self.path)]
+        except PermissionError:
+            self.files = ["..", "(Access Denied)"]
 
-def run_monitor():
-    logs = []
+    def on_key(self, key):
+        if key == 'UP': 
+            self.selected_idx = max(0, self.selected_idx - 1)
+        elif key == 'DOWN': 
+            self.selected_idx = min(len(self.files) - 1, self.selected_idx + 1)
+        elif key == 'ENTER':
+            chosen = self.files[self.selected_idx]
+            new_path = os.path.normpath(os.path.join(self.path, chosen))
+            if os.path.isdir(new_path):
+                self.path = new_path
+                self.selected_idx = 0
+                self.refresh_files()
+        elif key == 'q':
+            self.exit()
 
-    with Live(refresh=0.1) as live:
-        for i in range(101):
-            if random.random() < 0.1:
-                msg = f"Processed batch #{i}"
-                logs.append(msg)
-                live.log(Text(f"[LOG] {msg}").style(color="green"))
+    def render(self):
+        # Build List View manually (or use future Layout widgets)
+        lines = []
+        start = max(0, self.selected_idx - 5)
+        end = start + 10
+        
+        for i, f in enumerate(self.files[start:end]):
+            real_idx = start + i
+            if real_idx == self.selected_idx:
+                lines.append(f"> [green bold]{f}[/]")
+            else:
+                lines.append(f"  {f}")
+        
+        from termella import parse
+        p = panel(parse("\n".join(lines)), title=self.path, render=True)
+        return p
 
-            p_prog = get_progress_panel(i)
-            p_logs = get_logs_panel(logs)
-
-            live.update(grid([p_prog, p_logs], cols=1, render=True))
-
-run_monitor()
+FileManager().run()
 ```

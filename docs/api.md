@@ -146,3 +146,26 @@ Parses a markup string into a `Text` object.
 Registers a global alias for the markup parser.
 *   **name**: The tag name (e.g., "alert").
 *   **style_str**: The styles to apply (e.g., "red bold").
+
+## 6. 🖥️ Application (`termella.app`)
+
+### `class App(refresh_rate=0.1, mouse=False)`
+Base class for TUI apps.
+
+#### `run()`
+Starts the application loop. Blocks until `exit()` is called.
+
+#### `exit()`
+Signals the loop to stop.
+
+#### `render()` -> `str | Widget | list`
+**Abstract**. Must be overridden to define the UI.
+
+#### `on_key(key: str)`
+Hook for keyboard events.
+
+#### `on_click(x: int, y: int, btn: str)`
+Hook for mouse events.
+
+#### `on_resize(width: int, height: int)`
+Hook for resize events. Also updates `self.width` and `self.height`.
