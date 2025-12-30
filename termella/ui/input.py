@@ -31,11 +31,12 @@ class TextInput(Widget):
     """
     A single-line text input field
     """
-    def __init__(self, value="", placeholder="", width=20):
+    def __init__(self, value="", placeholder="", width=20, password=False):
         super().__init__()
         self.value = value
         self.placeholder = placeholder
         self.width_req = width
+        self.password = password
         self.focusable = True
         self.cursor_pos = len(value)
 
@@ -63,18 +64,26 @@ class TextInput(Widget):
             display_text = self.value
             style_tag = "white"
 
+        val_to_show = self.value
+        if self.password and val_to_show:
+            val_to_show = "*" * len(val_to_show)
+
+        if not self.value and not self.is_focused:
+            display_text = self.placeholder
+            style_tag = "dim"
+        else:
+            display_text = val_to_show
+            style_tag = "white"
+
         pad_len = max(0, self.width_req - len(display_text))
         padding = "_" * pad_len
 
         if self.is_focused:
             cursor = "[reverse] [/-]"
             content = f"[{style_tag}]{display_text}[/]{cursor}[dim]{padding[:-1]}[/]"
-        else:
-            content = f"[{style_tag}]{display_text}[/][dim]{padding}[/]"
-
-        if self.is_focused:
             final = f"[cyan] > [/]{content}"
         else:
+            content = f"[{style_tag}]{display_text}[/][dim]{padding}[/]"
             final = f"[dim]   [/]{content}"
 
         return [str(parse(final))]

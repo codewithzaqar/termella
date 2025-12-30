@@ -55,7 +55,7 @@ class App:
 
         if key == 'TAB' or key == 'DOWN':
             self._move_focus(1)
-        elif key == 'UP':
+        elif key == 'SHIFT_TAB' or key == 'UP':
             self._move_focus(-1)
         else:
             if self.focusable_widgets:

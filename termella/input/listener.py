@@ -121,6 +121,10 @@ class InputListener:
             if ch == '\r' or ch == '\n': return 'ENTER'
             if ch == ' ': return 'SPACE'
             if ch == '\x7f': return 'BACKSPACE'
+            if ch == '\t': return 'TAB'
+            if ch == '\x1b':
+                seq = sys.stdin.read(2)
+                if seq == '[Z': return 'SHIFT_TAB'
             if ch == '\x03': raise KeyboardInterrupt # Handle Ctrl+C
             return ch
         finally:
