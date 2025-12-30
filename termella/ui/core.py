@@ -10,6 +10,14 @@ class Widget:
         self.height_req = height
         self.is_focused = False
         self.focusable = False
+        self._rect = (0, 0, 0, 0)
+
+    def set_rect(self, x, y, w, h):
+        self._rect = (x, y, w, h)
+
+    def check_hit(self, mx, my):
+        x, y, w, h = self._rect
+        return (x <= mx < x + w) and (y <= my < y + h)
 
     def render(self):
         """

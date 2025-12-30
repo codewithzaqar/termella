@@ -28,6 +28,9 @@ class App:
         self.focusable_widgets = []
         self.focus_idx = 0
 
+    def set_root(self, widget):
+        self.root = widget
+
     def add_focusable(self, widget):
         """Register a widget to participate in Tab navigation."""
         self.focusable_widgets.append(widget)
@@ -73,7 +76,21 @@ class App:
         new_w = self.focusable_widgets[self.focus_idx]
         new_w.on_focus()
 
-    def on_click(self, x, y, btn): pass
+    def on_click(self, x, y, btn):
+        for i, widget in enumerate(self.focusable_widgets):
+            if widget.check_hit(x, y):
+                if i != self.focus_idx:
+                    self._move_focus_to_index(i)
+                if hasattr(widget, 'on_click_event'):
+                    widget.on_click_event()
+                break
+
+    def _move_focus_to_index(self, idx):
+        current = self.focusable_widgets[self.focus_idx]
+        current.on_blur()
+        self.focus_idx = idx
+        new_w = self.focusable_widgets[self.focus_idx]
+        new_w.on_focus()
 
     def on_resize(self, width, height):
         """Called when terminal dimensions change."""
@@ -171,3 +188,7 @@ class App:
             sys.stdout.write(ALT_SCREEN_EXIT)
             sys.stdout.write(CURSOR_SHOW)
             sys.stdout.flush()
+
+    def render_root(self, root_widget):
+        lines = root_widget.render()
+        return "\n".join(lines)

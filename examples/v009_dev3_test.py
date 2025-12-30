@@ -7,7 +7,7 @@ from termella import App, Label, VBox, TextInput, Button, panel
 class LoginApp(App):
     def on_start(self):
         self.user_input = TextInput(placeholder="Username", width=15)
-        self.pass_input = TextInput(placeholder="Password", width=15)
+        self.pass_input = TextInput(placeholder="Password", width=15, password=True)
         self.btn = Button("Login", on_click=self.login)
         self.status = "Please login."
 
