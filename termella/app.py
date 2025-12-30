@@ -51,7 +51,7 @@ class App:
         Override this to handle keypresses.
         key: 'a', 'ENTER', 'UP', 'ESC', etc.
         """
-        if key == 'q' or key == 'ESC': self.exit()
+        if key == 'ESC': self.exit()
 
         if key == 'TAB' or key == 'DOWN':
             self._move_focus(1)

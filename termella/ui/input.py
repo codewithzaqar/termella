@@ -24,3 +24,57 @@ class Button(Widget):
 
         renderable = parse(content)
         return [str(renderable)]
+    
+    pass
+
+class TextInput(Widget):
+    """
+    A single-line text input field
+    """
+    def __init__(self, value="", placeholder="", width=20):
+        super().__init__()
+        self.value = value
+        self.placeholder = placeholder
+        self.width_req = width
+        self.focusable = True
+        self.cursor_pos = len(value)
+
+    def on_key(self, key):
+        if key == 'BACKSPACE':
+            if self.value:
+                self.value = self.value[:-1]
+                self.cursor_pos -= 1
+            return True
+        elif key == 'SPACE':
+            self.value += " "
+            self.cursor_pos += 1
+            return True
+        elif len(key) == 1:
+            self.value += key
+            self.cursor_pos += 1
+            return True
+        return False
+    
+    def render(self):
+        if not self.value and not self.is_focused:
+            display_text = self.placeholder
+            style_tag = "dim"
+        else:
+            display_text = self.value
+            style_tag = "white"
+
+        pad_len = max(0, self.width_req - len(display_text))
+        padding = "_" * pad_len
+
+        if self.is_focused:
+            cursor = "[reverse] [/-]"
+            content = f"[{style_tag}]{display_text}[/]{cursor}[dim]{padding[:-1]}[/]"
+        else:
+            content = f"[{style_tag}]{display_text}[/][dim]{padding}[/]"
+
+        if self.is_focused:
+            final = f"[cyan] > [/]{content}"
+        else:
+            final = f"[dim]   [/]{content}"
+
+        return [str(parse(final))]

@@ -60,6 +60,7 @@ class InputListener:
                 if vk == 0x27: return 'RIGHT'
                 if vk == 0x1B: return 'ESC'
                 if vk == 0x0D: return 'ENTER'
+                if vk == 0x08: return 'BACKSPACE'
 
                 if char > 0:
                     return chr(char)
@@ -119,6 +120,7 @@ class InputListener:
             
             if ch == '\r' or ch == '\n': return 'ENTER'
             if ch == ' ': return 'SPACE'
+            if ch == '\x7f': return 'BACKSPACE'
             if ch == '\x03': raise KeyboardInterrupt # Handle Ctrl+C
             return ch
         finally:
