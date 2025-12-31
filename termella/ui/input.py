@@ -87,3 +87,42 @@ class TextInput(Widget):
             final = f"[dim]   [/]{content}"
 
         return [str(parse(final))]
+    
+class CheckBox(Widget):
+    """
+    A toggleable checkbox component.
+    """
+    def __init__(self, label, checked=False, on_change=None):
+        super().__init__()
+        self.label = label
+        self.checked = checked
+        self.on_change = on_change
+        self.focusable = True
+
+    def on_key(self, key):
+        if key == 'SPACE' or key == 'ENTER':
+            self.toggle()
+            return True
+        return False
+    
+    def on_click_event(self):
+        self.toggle()
+
+    def toggle(self):
+        self.checked = not self.checked
+        if self.on_change:
+            self.on_change(self.checked)
+
+    def render(self):
+        icon = "[green][x][/]" if self.checked else "[dim][ ][/]"
+
+        if self.is_focused:
+            prefix = "[cyan] > [/]"
+            text_style = "bold white"
+        else:
+            prefix = "   "
+            text_style = "white" if self.checked else "dim"
+
+        content = f"{prefix}{icon} [{text_style}]{self.label}[/]"
+
+        return [str(parse(content))]
