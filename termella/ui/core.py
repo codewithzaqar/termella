@@ -1,4 +1,4 @@
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Union
 from ..core import visible_len
 
 class Widget:
@@ -6,9 +6,16 @@ class Widget:
     Base class for Object-Oriented UI Components.
     Unlike functional widgets (termella.widgets.*), these maintain state.
     """
-    def __init__(self, width: Optional[int] = None, height: Optional[int] = None):
+    def __init__(self, width: Union[int, str, None] = None, height: Optional[int] = None):
         self.width_req = width
         self.height_req = height
+
+        self.width_percent: Optional[float] = None
+        if isinstance(width, str) and width.endswith('%'):
+            try:
+                self.width_percent = float(width[:-1]) / 100.0
+            except ValueError: pass
+
         self.is_focused: bool = False
         self.focusable: bool = False
         self._rect: Tuple[int, int, int, int] = (0, 0, 0, 0)
@@ -20,7 +27,7 @@ class Widget:
         x, y, w, h = self._rect
         return (x <= mx < x + w) and (y <= my < y + h)
 
-    def render(self) -> str:
+    def render(self, width: Optional[int] = None) -> List[str]:
         """
         Must return a list of strings (lines).
         """
@@ -30,7 +37,7 @@ class Widget:
         """
         Allows the widget to be passed directly to print(), panel(), or App.render().
         """
-        return "\n".join(self.render())
+        return "\n".join(self.render(width=None))
     
     def on_focus(self) -> None:
         """Called when widget gains focus."""
