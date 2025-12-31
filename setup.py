@@ -7,7 +7,7 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name="termella",
-    version="0.0.9",
+    version="0.1.0.dev0",
     description="A Python library for rich text and beautiful formatting in the terminal.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -35,6 +35,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Terminals",
         "Topic :: Utilities",
+        "Typing :: Typed",
     ],
     project_urls={
         "Bug Tracker": "https://github.com/codewithzaqar/termella/issues",

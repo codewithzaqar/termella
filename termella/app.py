@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+from typing import Optional, Union, List, Any
 from .ansi import (
     ALT_SCREEN_ENTER, ALT_SCREEN_EXIT,
     CURSOR_HIDE, CURSOR_SHOW,
@@ -18,17 +19,17 @@ class App:
     Base class for Full-Screen TUI Applications.
     Handles the Event Loop and Screen Buffer management.
     """
-    def __init__(self, refresh_rate=0.1, mouse=False):
-        self._running = False
+    def __init__(self, refresh_rate: float = 0.1, mouse: bool = False):
+        self._running: bool = False
         self.refresh_rate = refresh_rate
         self.mouse_enabled = mouse
         self.listener = InputListener()
         self._last_update = 0
         self.width = 80
         self.height = 24
-        self.focusable_widgets = []
+        self.focusable_widgets: List[Any] = []
         self.focus_idx = 0
-        self.screen = None
+        self.screen: Optional[Any] = None
         self._initialized = False
 
     def set_screen(self, screen_widget):
@@ -40,7 +41,7 @@ class App:
     def set_root(self, widget):
         self.root = widget
 
-    def add_focusable(self, widget):
+    def add_focusable(self, widget: Any) -> None:
         """Register a widget to participate in Tab navigation."""
         self.focusable_widgets.append(widget)
         if len(self.focusable_widgets) == 1:
@@ -106,13 +107,11 @@ class App:
         if self.screen and hasattr(self.screen, 'resize'):
             self.screen.resize(w, h)
 
-    def render(self):
+    def render(self) -> Union[str, Any, List[Any]]:
         """
         Return the UI to display.
         Should return a String, Widget, or List of Widgets.
         """
-        if self.screen:
-            return self.screen
         return ""
 
     def exit(self):
