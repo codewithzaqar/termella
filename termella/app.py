@@ -9,6 +9,7 @@ from .ansi import (
 )
 from .widgets import grid
 from .input.listener import InputListener
+from .renderer import render_to_string
 
 CURSOR_HOME = "\033[H"
 
@@ -131,14 +132,10 @@ class App:
 
     def _draw_frame(self):
         self._check_resize()
-
         self.on_update()
 
         view = self.render()
-        if isinstance(view, (list, tuple)):
-            content = grid(view, cols=1, render=True)
-        else:
-            content = str(view)
+        content = render_to_string(view)
 
         sys.stdout.write(CURSOR_HOME)
         sys.stdout.write(content)

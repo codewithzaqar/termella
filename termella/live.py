@@ -3,6 +3,7 @@ import time
 from .ansi import CURSOR_HIDE, CURSOR_SHOW, CURSOR_UP, CLEAR_EOS, CARRIAGE_RETURN
 from .widgets import grid
 from .core import Text
+from .renderer import render_to_string
 
 class Live:
     """
@@ -60,13 +61,7 @@ class Live:
         Args:
             renderable (str): The multi-line string to display.
         """
-        if isinstance(renderable, (list, tuple)):
-            text = grid(renderable, cols=1, render=True)
-        else:
-            text = str(renderable)
-
-        if text.endswith('\n'):
-            text = text.rstrip('\n')
+        text = render_to_string(renderable)
             
         lines = text.split('\n')
         new_height = len(lines)
