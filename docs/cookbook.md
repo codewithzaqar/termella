@@ -1,57 +1,50 @@
 # 🍳 Cookbook
 
-## The File Navigator (v0.0.8)
+## The Calculator (v0.0.9)
 
-A simple file browser using the App framework.
+A grid of buttons.
 
 ```python
-import os
-from termella import App, panel, select, grid
+from termella import App, Button, Label, VBox, grid, panel
 
-class FileManager(App):
+class CalcApp(App):
     def on_start(self):
-        self.path = os.getcwd()
-        self.files = []
-        self.selected_idx = 0
-        self.refresh_files()
+        self.display = "0"
+        self.buttons = []
+        
+        # Create Keypad
+        keys = [
+            "7", "8", "9", "/",
+            "4", "5", "6", "*",
+            "1", "2", "3", "-",
+            "C", "0", "=", "+"
+        ]
+        
+        for k in keys:
+            btn = Button(f" {k} ", on_click=lambda x=k: self.press(x))
+            self.buttons.append(btn)
+            self.add_focusable(btn)
 
-    def refresh_files(self):
-        try:
-            self.files = [".."] + [f for f in os.listdir(self.path)]
-        except PermissionError:
-            self.files = ["..", "(Access Denied)"]
-
-    def on_key(self, key):
-        if key == 'UP': 
-            self.selected_idx = max(0, self.selected_idx - 1)
-        elif key == 'DOWN': 
-            self.selected_idx = min(len(self.files) - 1, self.selected_idx + 1)
-        elif key == 'ENTER':
-            chosen = self.files[self.selected_idx]
-            new_path = os.path.normpath(os.path.join(self.path, chosen))
-            if os.path.isdir(new_path):
-                self.path = new_path
-                self.selected_idx = 0
-                self.refresh_files()
-        elif key == 'q':
-            self.exit()
+    def press(self, key):
+        if key == "C": self.display = "0"
+        elif key == "=":
+            try: self.display = str(eval(self.display))
+            except: self.display = "Error"
+        else:
+            if self.display == "0": self.display = key
+            else: self.display += key
 
     def render(self):
-        # Build List View manually (or use future Layout widgets)
-        lines = []
-        start = max(0, self.selected_idx - 5)
-        end = start + 10
+        screen = panel(
+            Label(f"[right]{self.display}[/]", align="right"), 
+            width=20, render=True
+        )
         
-        for i, f in enumerate(self.files[start:end]):
-            real_idx = start + i
-            if real_idx == self.selected_idx:
-                lines.append(f"> [green bold]{f}[/]")
-            else:
-                lines.append(f"  {f}")
+        # Convert Button objects to strings for the 'grid' functional layout
+        # (Future versions will have OOGrid container)
+        keypad_str = grid([str(b) for b in self.buttons], cols=4, render=True)
         
-        from termella import parse
-        p = panel(parse("\n".join(lines)), title=self.path, render=True)
-        return p
+        return VBox(Label(screen), Label(keypad_str), padding=1)
 
-FileManager().run()
+CalcApp().run()
 ```

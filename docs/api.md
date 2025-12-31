@@ -169,3 +169,32 @@ Hook for mouse events.
 
 #### `on_resize(width: int, height: int)`
 Hook for resize events. Also updates `self.width` and `self.height`.
+
+#### `add_focusable(widget)`
+Registers a widget for keyboard navigation (Tab cycling).
+
+#### `set_screen(widget)`
+Sets the root widget and links resize events.
+
+## 7. UI Components (`termella.ui`)
+
+### `class Label(text, style=None)`
+Displays text.
+
+### `class Button(label, on_click=None)`
+Interactive button.
+
+### `class TextInput(value="", placeholder="", password=False)`
+Interactive text input.
+
+### `class CheckBox(label, checked=False, on_change=None)`
+Interactive checkbox.
+
+### `class VBox(*children, padding=0)`
+Vertical layout container.
+
+### `class HBox(*children, padding=0)`
+Horizontal layout container.
+
+### `class Screen(*children)`
+Root layout container.
