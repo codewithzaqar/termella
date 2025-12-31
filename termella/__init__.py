@@ -1,6 +1,6 @@
 """
 Termella - Rich text and beautiful formatting in the terminal.
-Version: 0.0.9.dev6
+Version: 0.0.9.dev7
 """
 
 from .printer import cprint, cinput
@@ -9,7 +9,7 @@ from .widgets import panel, progress_bar, table, Spinner, select, checkbox, tree
 from .live import Live
 from .markup import parse, print_tag, add_alias
 from .app import App
-from .ui import Widget, Label, VBox, HBox, Button, TextInput, CheckBox
+from .ui import Widget, Label, VBox, HBox, Button, TextInput, CheckBox, Screen
 
 __version__ = "0.0.9.dev6"
 __all__ = [
@@ -19,5 +19,5 @@ __all__ = [
     "Live",
     "parse", "print_tag", "add_alias",
     "App",
-    "Widget", "Label", "VBox", "HBox", "Button", "TextInput", "CheckBox"
+    "Widget", "Label", "VBox", "HBox", "Button", "TextInput", "CheckBox", "Screen"
 ]

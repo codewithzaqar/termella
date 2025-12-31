@@ -27,6 +27,14 @@ class App:
         self.height = 24
         self.focusable_widgets = []
         self.focus_idx = 0
+        self.screen = None
+        self._initialized = False
+
+    def set_screen(self, screen_widget):
+        self.screen = screen_widget
+        self._check_resize()
+        if hasattr(self.screen, 'resize'):
+            self.screen.resize(self.width, self.height)
 
     def set_root(self, widget):
         self.root = widget
@@ -92,15 +100,18 @@ class App:
         new_w = self.focusable_widgets[self.focus_idx]
         new_w.on_focus()
 
-    def on_resize(self, width, height):
+    def on_resize(self, w, h):
         """Called when terminal dimensions change."""
-        pass
+        if self.screen and hasattr(self.screen, 'resize'):
+            self.screen.resize(w, h)
 
     def render(self):
         """
         Return the UI to display.
         Should return a String, Widget, or List of Widgets.
         """
+        if self.screen:
+            return self.screen
         return ""
 
     def exit(self):
@@ -113,10 +124,10 @@ class App:
             if size.columns != self.width or size.lines != self.height:
                 self.width = size.columns
                 self.height = size.lines
-                self.on_resize(self.width, self.height)
+                if self._initialized:
+                    self.on_resize(self.width, self.height)
                 sys.stdout.write(CLEAR_SCREEN)
-        except OSError:
-            pass
+        except OSError: pass
 
     def _draw_frame(self):
         self._check_resize()
@@ -153,9 +164,10 @@ class App:
                 if os.name != 'nt': sys.stdout.write(MOUSE_ON)
                 self.listener.enable_mouse()
             sys.stdout.flush()
-
             self._running = True
             self.on_start()
+            self._initialized = True
+            self._check_resize()
             self._draw_frame()
 
             # --- LOOP ---
