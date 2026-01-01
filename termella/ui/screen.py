@@ -14,5 +14,5 @@ class Screen(VBox):
         self.width = w
         self.height = h
 
-    def render(self):
-        return super().render()
+    def render(self, width=None):
+        return super().render(width=self.width)

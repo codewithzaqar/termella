@@ -41,38 +41,69 @@ class HBox(Container):
     def render(self, width: Optional[int] = None) -> List[str]:
         if not self.children: return []
 
+        total_w = width if width else 80
+        padding_total = self.padding * (len(self.children) - 1)
+        available = total_w - padding_total
         final_widths = [0] * len(self.children)
-        remaining_w = width if width else 80
-        total_padding = self.padding * (len(self.children) - 1)
-        remaining_w -= total_padding
+        used_space = 0
 
         for i, child in enumerate(self.children):
+            w = 0
             if isinstance(child.width_req, int):
-                final_widths[i] = child.width_req
-                remaining_w -= child.width_req
+                w = child.width_req
+            elif child.width_percent:
+                w = int(total_w * child.width_percent)
 
-        if width:
-            for i, child in enumerate(self.children):
-                if child.width_percent:
-                    w = int(width * child.width_percent)
-                    final_widths[i] = w
-                    remaining_w -= w
+            if w > 0:
+                final_widths[i] = w
+                used_space += w
 
-        auto_count = sum(1 for c in self.children if not c.width_req and not c.width_percent)
-        if auto_count > 0 and remaining_w > 0:
-            per_item = remaining_w // auto_count
-            for i, child in enumerate(self.children):
-                if final_widths[i] == 0:
-                    final_widths[i] = per_item
+        remaining = max(0, available - used_space)
+        auto_children = [i for i, c in enumerate(self.children) if final_widths[i] == 0]
 
-        rendered_children = []
+        if auto_children:
+            per_item =remaining // len(auto_children)
+            extra = remaining % len(auto_children)
+
+            for i in auto_children:
+                final_widths[i] = per_item
+                if extra > 0:
+                    final_widths[i] += 1
+                    extra -= 1
+
+        rendered_blocks = []
+        max_h = 0
+
         for i, child in enumerate(self.children):
-            lines = child.render(width=final_widths[i])
-            block = "\n".join(lines)
-            rendered_children.append(block)
+            w = final_widths[i]
+            if w <= 0:
+                rendered_blocks.append([])
+                continue
 
-        from ..widgets.layouts import columns
-        block_str = columns(*rendered_children, padding=self.padding, render=True)
+            lines = child.render(width=w)
+            rendered_blocks.append(lines)
+            max_h = max(max_h, len(lines))
 
-        if not block_str: return []
-        return block_str.split('\n')
+        output_lines = [""] * max_h
+        pad_str = " " * self.padding
+
+        for r in range(max_h):
+            row_parts = []
+            for i, block in enumerate(rendered_blocks):
+                if r < len(block):
+                    content = block[r]
+                else:
+                    content = ""
+
+                from ..core import visible_len
+                v_len = visible_len(content)
+                fill = final_widths[i] - v_len
+
+                if fill > 0:
+                    content += (" " * fill)
+
+                row_parts.append(content)
+
+            output_lines[r] = pad_str.join(row_parts)
+
+        return output_lines
